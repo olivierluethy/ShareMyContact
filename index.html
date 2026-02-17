@@ -1,549 +1,651 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>QR Contact</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-FJ60QSS8VW"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>QR Contact</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <!-- Google tag (gtag.js) -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-FJ60QSS8VW"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag() {
+                dataLayer.push(arguments);
+            }
+            gtag("js", new Date());
+            gtag("config", "G-FJ60QSS8VW");
+        </script>
+        <link
+            href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&display=swap"
+            rel="stylesheet"
+        />
+        <style>
+            /* ── Design tokens ─────────────────────────────────────── */
+            :root {
+                --bg: #0c0c0e;
+                --surface: #16161a;
+                --surface2: #1e1e24;
+                --border: #2c2c34;
+                --border2: #38383f;
+                --muted: #4e4e5a;
+                --sub: #8f8f9e;
+                --text: #e2e2e8;
+                --accent: #6ee7b7;
+                --accent-dk: #059669;
+                --danger: #f87171;
+                --radius: 12px;
+                --radius-sm: 8px;
+            }
 
-  gtag('config', 'G-FJ60QSS8VW');
-</script>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
-<style>
-  /* ── Design tokens ─────────────────────────────────────── */
-  :root {
-    --bg:        #0c0c0e;
-    --surface:   #16161a;
-    --surface2:  #1e1e24;
-    --border:    #2c2c34;
-    --border2:   #38383f;
-    --muted:     #4e4e5a;
-    --sub:       #8f8f9e;
-    --text:      #e2e2e8;
-    --accent:    #6ee7b7;
-    --accent-dk: #059669;
-    --danger:    #f87171;
-    --radius:    12px;
-    --radius-sm: 8px;
-  }
+            *,
+            *::before,
+            *::after {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
 
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+            html {
+                font-size: 16px;
+            }
 
-  html { font-size: 16px; }
+            body {
+                background: var(--bg);
+                color: var(--text);
+                font-family: "DM Sans", sans-serif;
+                font-weight: 400;
+                min-height: 100vh;
+                -webkit-font-smoothing: antialiased;
+            }
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    font-weight: 400;
-    min-height: 100vh;
-    -webkit-font-smoothing: antialiased;
-  }
+            .field-group {
+                display: flex;
+                flex-direction: column;
+                gap: 7px;
+            }
 
-  /* ── Inputs ─────────────────────────────────────────────── */
-  .field-group { display: flex; flex-direction: column; gap: 7px; }
+            label.field-label {
+                font-size: 11px;
+                font-weight: 500;
+                color: var(--sub);
+                letter-spacing: 0.07em;
+                text-transform: uppercase;
+                font-family: "DM Mono", monospace;
+            }
 
-  label.field-label {
-    font-size: 11px;
-    font-weight: 500;
-    color: var(--sub);
-    letter-spacing: .07em;
-    text-transform: uppercase;
-    font-family: 'DM Mono', monospace;
-  }
+            input.field {
+                background: var(--surface);
+                border: 1px solid var(--border);
+                color: var(--text);
+                border-radius: var(--radius-sm);
+                padding: 13px 15px;
+                font-size: 15px;
+                font-family: "DM Sans", sans-serif;
+                width: 100%;
+                transition:
+                    border-color 0.15s,
+                    box-shadow 0.15s;
+                outline: none;
+                appearance: none;
+            }
+            input.field:focus {
+                border-color: var(--accent);
+                box-shadow: 0 0 0 3px rgba(110, 231, 183, 0.08);
+            }
+            input.field::placeholder {
+                color: var(--muted);
+            }
 
-  input.field {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    color: var(--text);
-    border-radius: var(--radius-sm);
-    padding: 13px 15px;
-    font-size: 15px;
-    font-family: 'DM Sans', sans-serif;
-    width: 100%;
-    transition: border-color .15s, box-shadow .15s;
-    outline: none;
-    appearance: none;
-  }
-  input.field:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(110,231,183,.08);
-  }
-  input.field::placeholder { color: var(--muted); }
+            .btn {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                font-family: "DM Sans", sans-serif;
+                font-size: 14px;
+                font-weight: 600;
+                border: none;
+                border-radius: var(--radius-sm);
+                padding: 13px 20px;
+                cursor: pointer;
+                transition:
+                    opacity 0.15s,
+                    transform 0.1s,
+                    background 0.15s;
+                white-space: nowrap;
+                text-decoration: none;
+            }
+            .btn:active {
+                transform: scale(0.97);
+            }
+            .btn:disabled {
+                opacity: 0.45;
+                cursor: not-allowed;
+                transform: none;
+            }
 
-  /* ── Buttons ─────────────────────────────────────────────── */
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    border: none;
-    border-radius: var(--radius-sm);
-    padding: 13px 20px;
-    cursor: pointer;
-    transition: opacity .15s, transform .1s, background .15s;
-    white-space: nowrap;
-    text-decoration: none;
-  }
-  .btn:active { transform: scale(.97); }
-  .btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+            .btn-primary {
+                background: var(--accent);
+                color: #06140f;
+                width: 100%;
+                font-size: 15px;
+                padding: 15px 20px;
+            }
+            .btn-primary:hover:not(:disabled) {
+                opacity: 0.88;
+            }
 
-  .btn-primary {
-    background: var(--accent);
-    color: #06140f;
-    width: 100%;
-    font-size: 15px;
-    padding: 15px 20px;
-  }
-  .btn-primary:hover:not(:disabled) { opacity: .88; }
+            .btn-ghost {
+                background: transparent;
+                color: var(--sub);
+                border: 1px solid var(--border);
+            }
+            .btn-ghost:hover:not(:disabled) {
+                border-color: var(--border2);
+                color: var(--text);
+            }
 
-  .btn-ghost {
-    background: transparent;
-    color: var(--sub);
-    border: 1px solid var(--border);
-  }
-  .btn-ghost:hover:not(:disabled) { border-color: var(--border2); color: var(--text); }
+            .btn-sm {
+                padding: 9px 16px;
+                font-size: 13px;
+            }
 
-  .btn-sm { padding: 9px 16px; font-size: 13px; }
+            .card {
+                background: var(--surface);
+                border: 1px solid var(--border);
+                border-radius: var(--radius);
+                padding: 24px;
+            }
 
-  /* ── Cards ───────────────────────────────────────────────── */
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 24px;
-  }
+            #qr-output canvas,
+            #qr-output img {
+                border-radius: 10px;
+                display: block;
+            }
 
-  /* ── QR wrapper ──────────────────────────────────────────── */
-  #qr-output canvas,
-  #qr-output img {
-    border-radius: 10px;
-    display: block;
-  }
+            .pill {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                background: var(--surface2);
+                border: 1px solid var(--border);
+                border-radius: 100px;
+                padding: 5px 12px;
+                font-size: 12px;
+                color: var(--sub);
+                font-family: "DM Mono", monospace;
+            }
+            .pill-dot {
+                width: 6px;
+                height: 6px;
+                border-radius: 50%;
+                background: var(--accent);
+                flex-shrink: 0;
+            }
 
-  /* ── Pill badge ──────────────────────────────────────────── */
-  .pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 100px;
-    padding: 5px 12px;
-    font-size: 12px;
-    color: var(--sub);
-    font-family: 'DM Mono', monospace;
-  }
-  .pill-dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: var(--accent);
-    flex-shrink: 0;
-  }
+            .detail-row {
+                display: flex;
+                align-items: center;
+                gap: 14px;
+                padding: 13px 0;
+                border-bottom: 1px solid var(--border);
+            }
+            .detail-row:last-child {
+                border-bottom: none;
+            }
+            .detail-icon {
+                width: 36px;
+                height: 36px;
+                border-radius: 8px;
+                background: var(--surface2);
+                border: 1px solid var(--border);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 16px;
+                flex-shrink: 0;
+            }
+            .detail-label {
+                font-size: 10px;
+                color: var(--muted);
+                text-transform: uppercase;
+                letter-spacing: 0.07em;
+                margin-bottom: 2px;
+                font-family: "DM Mono", monospace;
+            }
+            .detail-value {
+                font-size: 15px;
+                color: var(--text);
+                font-weight: 400;
+                word-break: break-all;
+                text-decoration: none;
+            }
+            a.detail-value:hover {
+                color: var(--accent);
+            }
 
-  /* ── Detail rows (public view) ───────────────────────────── */
-  .detail-row {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 13px 0;
-    border-bottom: 1px solid var(--border);
-  }
-  .detail-row:last-child { border-bottom: none; }
-  .detail-icon {
-    width: 36px; height: 36px;
-    border-radius: 8px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 16px;
-    flex-shrink: 0;
-  }
-  .detail-label {
-    font-size: 10px;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: .07em;
-    margin-bottom: 2px;
-    font-family: 'DM Mono', monospace;
-  }
-  .detail-value {
-    font-size: 15px;
-    color: var(--text);
-    font-weight: 400;
-    word-break: break-all;
-    text-decoration: none;
-  }
-  a.detail-value:hover { color: var(--accent); }
+            .avatar {
+                width: 68px;
+                height: 68px;
+                border-radius: 50%;
+                background: linear-gradient(135deg, var(--surface2) 0%, var(--surface) 100%);
+                border: 2px solid var(--border2);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 24px;
+                font-weight: 600;
+                color: var(--accent);
+                letter-spacing: -0.02em;
+                flex-shrink: 0;
+            }
 
-  /* ── Avatar ──────────────────────────────────────────────── */
-  .avatar {
-    width: 68px; height: 68px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--surface2) 0%, var(--surface) 100%);
-    border: 2px solid var(--border2);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 24px; font-weight: 600;
-    color: var(--accent);
-    letter-spacing: -.02em;
-    flex-shrink: 0;
-  }
+            .link-box {
+                background: var(--surface2);
+                border: 1px solid var(--border);
+                border-radius: var(--radius-sm);
+                padding: 11px 14px;
+                font-family: "DM Mono", monospace;
+                font-size: 12px;
+                color: var(--sub);
+                word-break: break-all;
+                line-height: 1.5;
+            }
 
-  /* ── Shareable link row ──────────────────────────────────── */
-  .link-box {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 11px 14px;
-    font-family: 'DM Mono', monospace;
-    font-size: 12px;
-    color: var(--sub);
-    word-break: break-all;
-    line-height: 1.5;
-  }
+            #toast {
+                position: fixed;
+                bottom: 28px;
+                left: 50%;
+                transform: translateX(-50%) translateY(12px);
+                background: var(--surface2);
+                border: 1px solid var(--border2);
+                color: var(--text);
+                padding: 10px 18px;
+                border-radius: 100px;
+                font-size: 13px;
+                font-weight: 500;
+                opacity: 0;
+                transition:
+                    opacity 0.2s,
+                    transform 0.2s;
+                pointer-events: none;
+                white-space: nowrap;
+                z-index: 9999;
+            }
+            #toast.show {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+            #toast.success {
+                background: var(--accent);
+                color: #06140f;
+                border-color: var(--accent);
+            }
+            #toast.error {
+                background: var(--danger);
+                color: #fff;
+                border-color: var(--danger);
+            }
 
-  /* ── Toast ───────────────────────────────────────────────── */
-  #toast {
-    position: fixed;
-    bottom: 28px;
-    left: 50%;
-    transform: translateX(-50%) translateY(12px);
-    background: var(--surface2);
-    border: 1px solid var(--border2);
-    color: var(--text);
-    padding: 10px 18px;
-    border-radius: 100px;
-    font-size: 13px;
-    font-weight: 500;
-    opacity: 0;
-    transition: opacity .2s, transform .2s;
-    pointer-events: none;
-    white-space: nowrap;
-    z-index: 9999;
-  }
-  #toast.show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
-  #toast.success { background: var(--accent); color: #06140f; border-color: var(--accent); }
-  #toast.error   { background: var(--danger);  color: #fff;    border-color: var(--danger); }
+            .spinner {
+                width: 18px;
+                height: 18px;
+                border: 2px solid rgba(6, 20, 15, 0.25);
+                border-top-color: #06140f;
+                border-radius: 50%;
+                animation: spin 0.6s linear infinite;
+                flex-shrink: 0;
+            }
+            @keyframes spin {
+                to {
+                    transform: rotate(360deg);
+                }
+            }
 
-  /* ── Loading spinner ─────────────────────────────────────── */
-  .spinner {
-    width: 18px; height: 18px;
-    border: 2px solid rgba(6,20,15,.25);
-    border-top-color: #06140f;
-    border-radius: 50%;
-    animation: spin .6s linear infinite;
-    flex-shrink: 0;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
+            .fade-in {
+                animation: fadeUp 0.22s ease both;
+            }
+            @keyframes fadeUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(10px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
 
-  /* ── Fade-in ─────────────────────────────────────────────── */
-  .fade-in { animation: fadeUp .22s ease both; }
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(10px); }
-    to   { opacity: 1; transform: translateY(0);    }
-  }
+            .divider {
+                border: none;
+                border-top: 1px solid var(--border);
+                margin: 0;
+            }
 
-  /* ── Section divider ─────────────────────────────────────── */
-  .divider {
-    border: none;
-    border-top: 1px solid var(--border);
-    margin: 0;
-  }
+            .wordmark {
+                font-family: "DM Mono", monospace;
+                font-size: 12px;
+                color: var(--muted);
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+            }
 
-  /* ── Wordmark ─────────────────────────────────────────────── */
-  .wordmark {
-    font-family: 'DM Mono', monospace;
-    font-size: 12px;
-    color: var(--muted);
-    letter-spacing: .08em;
-    text-transform: uppercase;
-  }
+            .edited-badge {
+                font-size: 11px;
+                font-family: "DM Mono", monospace;
+                color: var(--accent);
+                background: rgba(110, 231, 183, 0.08);
+                border: 1px solid rgba(110, 231, 183, 0.2);
+                border-radius: 100px;
+                padding: 3px 10px;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="app" style="max-width: 480px; margin: 0 auto; padding: 28px 16px 80px"></div>
+        <div id="toast"></div>
 
-  /* ── Edited badge ────────────────────────────────────────── */
-  .edited-badge {
-    font-size: 11px;
-    font-family: 'DM Mono', monospace;
-    color: var(--accent);
-    background: rgba(110,231,183,.08);
-    border: 1px solid rgba(110,231,183,.2);
-    border-radius: 100px;
-    padding: 3px 10px;
-  }
-</style>
-</head>
-<body>
+        <script>
+            // ═══════════════════════════════════════════════════════════════
+            // CONFIG
+            // ═══════════════════════════════════════════════════════════════
+            const API_BASE = "./api.php";
 
-<div id="app" style="max-width:480px; margin:0 auto; padding: 28px 16px 80px;"></div>
-<div id="toast"></div>
+            // localStorage keys
+            const LS_PROFILE = "qrc_profile";
+            const LS_VIEW_MODE = "qrc_view";
 
-<script>
-// ═══════════════════════════════════════════════════════════════
-// CONFIG — adjust API_BASE to your server path
-// ═══════════════════════════════════════════════════════════════
-const API_BASE = './api.php';
+            // ═══════════════════════════════════════════════════════════════
+            // Utilities
+            // ═══════════════════════════════════════════════════════════════
+            const app = () => document.getElementById("app");
+            const $ = (sel, ctx = document) => ctx.querySelector(sel);
 
-// ═══════════════════════════════════════════════════════════════
-// localStorage keys
-// ═══════════════════════════════════════════════════════════════
-const LS_PROFILE   = 'qrc_profile';   // { profile_id, token, name, phone, email, company, website, linkedin }
-const LS_VIEW_MODE = 'qrc_view';      // 'form' | 'qr'
+            function esc(s) {
+                return String(s ?? "")
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;");
+            }
 
-// ═══════════════════════════════════════════════════════════════
-// Utilities
-// ═══════════════════════════════════════════════════════════════
-const app  = () => document.getElementById('app');
-const $    = (sel, ctx = document) => ctx.querySelector(sel);
+            let _toastTimer;
+            function toast(msg, type = "", duration = 2400) {
+                const el = document.getElementById("toast");
+                el.textContent = msg;
+                el.className = "show " + type;
+                clearTimeout(_toastTimer);
+                _toastTimer = setTimeout(() => {
+                    el.className = "";
+                }, duration);
+            }
 
-function esc(s) {
-  return String(s ?? '')
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
+            function shareUrl(token) {
+                const base = window.location.origin + window.location.pathname;
+                return base + "?token=" + token;
+            }
 
-let _toastTimer;
-function toast(msg, type = '', duration = 2400) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.className   = 'show ' + type;
-  clearTimeout(_toastTimer);
-  _toastTimer = setTimeout(() => { el.className = ''; }, duration);
-}
+            function getInitials(name) {
+                return (name || "?")
+                    .split(" ")
+                    .map((w) => w[0])
+                    .join("")
+                    .slice(0, 2)
+                    .toUpperCase();
+            }
 
-function shareUrl(token) {
-  // Public view is the same HTML file with ?token= param
-  const base = window.location.origin + window.location.pathname;
-  return base + '?token=' + token;
-}
+            function loadProfile() {
+                try {
+                    return JSON.parse(localStorage.getItem(LS_PROFILE) || "null");
+                } catch {
+                    return null;
+                }
+            }
+            function saveProfile(p) {
+                localStorage.setItem(LS_PROFILE, JSON.stringify(p));
+            }
+            function clearProfile() {
+                localStorage.removeItem(LS_PROFILE);
+                localStorage.removeItem(LS_VIEW_MODE);
+            }
 
-function getInitials(name) {
-  return (name || '?').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
-}
+            function loadViewMode() {
+                return localStorage.getItem(LS_VIEW_MODE) || "form";
+            }
+            function saveViewMode(v) {
+                localStorage.setItem(LS_VIEW_MODE, v);
+            }
 
-function loadProfile()  { try { return JSON.parse(localStorage.getItem(LS_PROFILE) || 'null'); } catch { return null; } }
-function saveProfile(p) { localStorage.setItem(LS_PROFILE, JSON.stringify(p)); }
-function clearProfile() { localStorage.removeItem(LS_PROFILE); localStorage.removeItem(LS_VIEW_MODE); }
+            // Google Analytics helper
+            function trackEvent(eventName, params = {}) {
+                if (typeof gtag === "function") {
+                    gtag("event", eventName, params);
+                }
+            }
 
-function loadViewMode()  { return localStorage.getItem(LS_VIEW_MODE) || 'form'; }
-function saveViewMode(v) { localStorage.setItem(LS_VIEW_MODE, v); }
+            // ═══════════════════════════════════════════════════════════════
+            // API calls
+            // ═══════════════════════════════════════════════════════════════
+            async function apiSave(payload) {
+                const res = await fetch(API_BASE + "?action=save", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload),
+                });
+                if (!res.ok) throw new Error("Server error " + res.status);
+                const json = await res.json();
+                if (json.error) throw new Error(json.error);
+                return json;
+            }
 
-// ═══════════════════════════════════════════════════════════════
-// API calls
-// ═══════════════════════════════════════════════════════════════
-async function apiSave(payload) {
-  const res  = await fetch(API_BASE + '?action=save', {
-    method:  'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body:    JSON.stringify(payload),
-  });
-  if (!res.ok) throw new Error('Server error ' + res.status);
-  const json = await res.json();
-  if (json.error) throw new Error(json.error);
-  return json; // { profile_id, token }
-}
+            async function apiGetContact(token) {
+                const res = await fetch(API_BASE + "?action=contact&token=" + encodeURIComponent(token));
+                if (!res.ok) throw new Error("Server error " + res.status);
+                const json = await res.json();
+                if (json.error) throw new Error(json.error);
+                return json;
+            }
 
-async function apiGetContact(token) {
-  const res  = await fetch(API_BASE + '?action=contact&token=' + encodeURIComponent(token));
-  if (!res.ok) throw new Error('Server error ' + res.status);
-  const json = await res.json();
-  if (json.error) throw new Error(json.error);
-  return json; // { profile_id, name, details:{...} }
-}
+            // ═══════════════════════════════════════════════════════════════
+            // VIEW: Create / Edit Form
+            // ═══════════════════════════════════════════════════════════════
+            function renderForm(prefill = {}) {
+                saveViewMode("form");
+                trackEvent("view_form", { has_existing_profile: !!prefill.profile_id });
 
-// ═══════════════════════════════════════════════════════════════
-// VIEW: Create / Edit Form
-// ═══════════════════════════════════════════════════════════════
-function renderForm(prefill = {}) {
-  saveViewMode('form');
+                const hasExisting = !!prefill.profile_id;
 
-  const hasExisting = !!prefill.profile_id;
-
-  app().innerHTML = `
+                app().innerHTML = `
     <div class="fade-in">
 
-      <!-- Wordmark -->
       <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:32px;">
-        <span class="wordmark">QR Contact</span>
-        ${hasExisting
-          ? `<button class="btn btn-ghost btn-sm" id="view-qr-btn">View my QR →</button>`
-          : ''}
-      </div>
+  <a href="/landing.html" class="wordmark" style="text-decoration:none;">
+    QR Contact
+  </a>
+  ${hasExisting ? `<button class="btn btn-ghost btn-sm" id="view-qr-btn">View my QR →</button>` : ""}
+</div>
 
-      <!-- Headline -->
+
       <div style="margin-bottom:28px;">
         <h1 style="font-size:24px; font-weight:600; line-height:1.25; margin-bottom:8px;">
-          ${hasExisting ? 'Update your card' : 'Create your card'}
+          ${hasExisting ? "Update your card" : "Create your card"}
         </h1>
         <p style="color:var(--sub); font-size:14px; font-weight:300; line-height:1.55;">
-          ${hasExisting
-            ? 'Edit your details and regenerate the QR code.'
-            : 'Fill in your details once. Share forever via QR code.'}
+          ${
+              hasExisting
+                  ? "Edit your details and regenerate the QR code."
+                  : "Fill in your details once. Share forever via QR code."
+          }
         </p>
       </div>
 
-      <!-- Form -->
       <div class="card" style="margin-bottom:16px;">
         <form id="contact-form" style="display:flex; flex-direction:column; gap:18px;">
 
           <div class="field-group">
             <label class="field-label">Full name <span style="color:var(--danger);">*</span></label>
             <input class="field" name="name" type="text" placeholder="Jane Smith"
-                   autocomplete="name" value="${esc(prefill.name || '')}" required/>
+                   autocomplete="name" value="${esc(prefill.name || "")}" required/>
           </div>
 
           <div class="field-group">
             <label class="field-label">Phone</label>
             <input class="field" name="phone" type="tel" placeholder="+1 555 000 0000"
-                   autocomplete="tel" value="${esc(prefill.phone || '')}"/>
+                   autocomplete="tel" value="${esc(prefill.phone || "")}"/>
           </div>
 
           <div class="field-group">
             <label class="field-label">Email</label>
             <input class="field" name="email" type="email" placeholder="jane@example.com"
-                   autocomplete="email" value="${esc(prefill.email || '')}"/>
+                   autocomplete="email" value="${esc(prefill.email || "")}"/>
           </div>
 
           <div class="field-group">
             <label class="field-label">Company <span style="color:var(--muted); font-size:10px; text-transform:none; letter-spacing:0;">optional</span></label>
             <input class="field" name="company" type="text" placeholder="Acme Inc."
-                   autocomplete="organization" value="${esc(prefill.company || '')}"/>
+                   autocomplete="organization" value="${esc(prefill.company || "")}"/>
           </div>
 
           <div class="field-group">
             <label class="field-label">Website <span style="color:var(--muted); font-size:10px; text-transform:none; letter-spacing:0;">optional</span></label>
             <input class="field" name="website" type="url" placeholder="https://example.com"
-                   autocomplete="url" value="${esc(prefill.website || '')}"/>
+                   autocomplete="url" value="${esc(prefill.website || "")}"/>
           </div>
 
           <div class="field-group">
             <label class="field-label">LinkedIn <span style="color:var(--muted); font-size:10px; text-transform:none; letter-spacing:0;">optional</span></label>
             <input class="field" name="linkedin" type="url" placeholder="https://linkedin.com/in/jane"
-                   value="${esc(prefill.linkedin || '')}"/>
+                   value="${esc(prefill.linkedin || "")}"/>
           </div>
 
           <div style="padding-top:4px;">
             <button type="submit" class="btn btn-primary" id="submit-btn">
-              ${hasExisting ? 'Save &amp; Update QR' : 'Generate QR Code →'}
+              ${hasExisting ? "Save &amp; Update QR" : "Generate QR Code →"}
             </button>
           </div>
 
         </form>
       </div>
 
-      ${hasExisting ? `
+      ${
+          hasExisting
+              ? `
         <div style="text-align:center;">
           <button class="btn btn-ghost btn-sm" id="clear-btn" style="color:var(--muted); border-color:transparent; font-size:12px;">
             Clear saved data
           </button>
-        </div>` : ''}
+        </div>`
+              : ""
+      }
 
     </div>
   `;
 
-  // View QR shortcut (if returning user)
-  if (hasExisting) {
-    $('#view-qr-btn')?.addEventListener('click', () => renderQR(prefill));
-    $('#clear-btn')?.addEventListener('click', () => {
-      if (confirm('Delete all saved contact data from this device?')) {
-        clearProfile();
-        renderForm({});
-        toast('Data cleared', '', 1800);
-      }
-    });
-  }
+                if (hasExisting) {
+                    $("#view-qr-btn")?.addEventListener("click", () => {
+                        trackEvent("click_view_qr_from_form");
+                        renderQR(prefill);
+                    });
 
-  // Form submit
-  $('#contact-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const btn  = $('#submit-btn');
-    const data = Object.fromEntries(new FormData(e.target));
-    if (!data.name.trim()) { toast('Name is required', 'error'); return; }
+                    $("#clear-btn")?.addEventListener("click", () => {
+                        if (confirm("Delete all saved contact data from this device?")) {
+                            trackEvent("click_clear_data");
+                            clearProfile();
+                            renderForm({});
+                            toast("Data cleared", "", 1800);
+                        }
+                    });
+                }
 
-    btn.innerHTML = `<div class="spinner"></div> Saving…`;
-    btn.disabled  = true;
+                $("#contact-form").addEventListener("submit", async (e) => {
+                    e.preventDefault();
+                    const btn = $("#submit-btn");
+                    const data = Object.fromEntries(new FormData(e.target));
 
-    try {
-      const payload = { ...data };
-      if (prefill.profile_id) payload.profile_id = prefill.profile_id;
+                    if (!data.name.trim()) {
+                        toast("Name is required", "error");
+                        trackEvent("form_submit_invalid", { reason: "missing_name" });
+                        return;
+                    }
 
-      const result = await apiSave(payload);
+                    btn.innerHTML = `<div class="spinner"></div> Saving…`;
+                    btn.disabled = true;
 
-      // Merge into saved profile
-      const profile = {
-        profile_id: result.profile_id,
-        token:      result.token,
-        name:       data.name,
-        phone:      data.phone     || '',
-        email:      data.email     || '',
-        company:    data.company   || '',
-        website:    data.website   || '',
-        linkedin:   data.linkedin  || '',
-      };
-      saveProfile(profile);
-      renderQR(profile);
+                    try {
+                        const payload = { ...data };
+                        if (prefill.profile_id) payload.profile_id = prefill.profile_id;
 
-    } catch (err) {
-      btn.innerHTML = hasExisting ? 'Save &amp; Update QR' : 'Generate QR Code →';
-      btn.disabled  = false;
-      toast('Error: ' + err.message, 'error');
-    }
-  });
-}
+                        const result = await apiSave(payload);
 
-// ═══════════════════════════════════════════════════════════════
-// VIEW: QR Code (owner view)
-// ═══════════════════════════════════════════════════════════════
-function renderQR(profile) {
-  saveViewMode('qr');
+                        const profile = {
+                            profile_id: result.profile_id,
+                            token: result.token,
+                            name: data.name,
+                            phone: data.phone || "",
+                            email: data.email || "",
+                            company: data.company || "",
+                            website: data.website || "",
+                            linkedin: data.linkedin || "",
+                        };
+                        saveProfile(profile);
 
-  const url = shareUrl(profile.token);
+                        trackEvent("form_submit_success", {
+                            has_existing_profile: !!prefill.profile_id,
+                            has_phone: !!data.phone?.trim(),
+                            has_email: !!data.email?.trim(),
+                            has_company: !!data.company?.trim(),
+                            has_website: !!data.website?.trim(),
+                            has_linkedin: !!data.linkedin?.trim(),
+                        });
 
-  app().innerHTML = `
+                        renderQR(profile);
+                    } catch (err) {
+                        btn.innerHTML = hasExisting ? "Save &amp; Update QR" : "Generate QR Code →";
+                        btn.disabled = false;
+                        toast("Error: " + err.message, "error");
+                        trackEvent("form_submit_error", { error_message: err.message.slice(0, 150) });
+                    }
+                });
+            }
+
+            // ═══════════════════════════════════════════════════════════════
+            // VIEW: QR Code (owner view)
+            // ═══════════════════════════════════════════════════════════════
+            function renderQR(profile) {
+                saveViewMode("qr");
+                trackEvent("view_qr", { has_existing_profile: true });
+
+                const url = shareUrl(profile.token);
+
+                app().innerHTML = `
     <div class="fade-in">
 
-      <!-- Wordmark + edit -->
       <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:28px;">
         <span class="wordmark">QR Contact</span>
         <button class="btn btn-ghost btn-sm" id="edit-btn">Edit details</button>
       </div>
 
-      <!-- QR card -->
       <div class="card" style="text-align:center; margin-bottom:14px;">
         <div style="font-family:'DM Mono',monospace; font-size:11px; color:var(--muted); letter-spacing:.09em; text-transform:uppercase; margin-bottom:18px;">Scan to save contact</div>
 
-        <!-- QR code -->
         <div id="qr-output" style="display:flex; justify-content:center; margin-bottom:20px;"></div>
 
-        <!-- Identity -->
         <div style="display:flex; align-items:center; justify-content:center; gap:12px;">
           <div class="avatar">${getInitials(profile.name)}</div>
           <div style="text-align:left;">
             <div style="font-size:17px; font-weight:600; line-height:1.2;">${esc(profile.name)}</div>
-            ${profile.company ? `<div style="font-size:13px; color:var(--sub); margin-top:2px;">${esc(profile.company)}</div>` : ''}
+            ${profile.company ? `<div style="font-size:13px; color:var(--sub); margin-top:2px;">${esc(profile.company)}</div>` : ""}
           </div>
         </div>
       </div>
 
-      <!-- Share link -->
       <div class="card" style="margin-bottom:14px;">
         <div style="font-family:'DM Mono',monospace; font-size:10px; color:var(--muted); letter-spacing:.07em; text-transform:uppercase; margin-bottom:10px;">Shareable link</div>
         <div class="link-box" id="share-url">${esc(url)}</div>
       </div>
 
-      <!-- Actions -->
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
         <button class="btn btn-ghost" id="copy-btn">Copy link</button>
         <a href="${API_BASE}?action=vcard&token=${encodeURIComponent(profile.token)}"
@@ -555,7 +657,6 @@ function renderQR(profile) {
         Share contact card
       </button>
 
-      <!-- Tip -->
       <p style="text-align:center; color:var(--muted); font-size:12px; margin-top:20px; line-height:1.6;">
         This page remembers your card. Open it anytime to show your QR.
       </p>
@@ -563,48 +664,59 @@ function renderQR(profile) {
     </div>
   `;
 
-  // Generate QR
-  new QRCode($('#qr-output'), {
-    text:         url,
-    width:        210,
-    height:       210,
-    colorDark:    '#0c0c0e',
-    colorLight:   '#d4d4d8',
-    correctLevel: QRCode.CorrectLevel.M,
-  });
+                new QRCode($("#qr-output"), {
+                    text: url,
+                    width: 210,
+                    height: 210,
+                    colorDark: "#0c0c0e",
+                    colorLight: "#d4d4d8",
+                    correctLevel: QRCode.CorrectLevel.M,
+                });
 
-  $('#edit-btn').addEventListener('click', () => renderForm(profile));
+                $("#edit-btn").addEventListener("click", () => {
+                    trackEvent("click_edit_from_qr");
+                    renderForm(profile);
+                });
 
-  $('#copy-btn').addEventListener('click', async () => {
-    try {
-      await navigator.clipboard.writeText(url);
-      toast('Link copied!', 'success');
-    } catch {
-      toast('Copy failed — select manually', 'error');
-    }
-  });
+                $("#copy-btn").addEventListener("click", async () => {
+                    trackEvent("click_copy_link");
+                    try {
+                        await navigator.clipboard.writeText(url);
+                        toast("Link copied!", "success");
+                    } catch {
+                        toast("Copy failed — select manually", "error");
+                    }
+                });
 
-  $('#share-btn').addEventListener('click', async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: profile.name + ' — Contact Card', url });
-      } catch {}
-    } else {
-      try {
-        await navigator.clipboard.writeText(url);
-        toast('Link copied!', 'success');
-      } catch {
-        toast('Copy failed', 'error');
-      }
-    }
-  });
-}
+                $("#share-btn").addEventListener("click", async () => {
+                    trackEvent("click_share_contact");
+                    if (navigator.share) {
+                        try {
+                            await navigator.share({ title: profile.name + " — Contact Card", url });
+                        } catch {}
+                    } else {
+                        try {
+                            await navigator.clipboard.writeText(url);
+                            toast("Link copied!", "success");
+                        } catch {
+                            toast("Copy failed", "error");
+                        }
+                    }
+                });
 
-// ═══════════════════════════════════════════════════════════════
-// VIEW: Public contact (scanned QR)
-// ═══════════════════════════════════════════════════════════════
-function renderPublicContact(token) {
-  app().innerHTML = `
+                // Optional: confirm QR is visible
+                setTimeout(() => {
+                    trackEvent("qr_code_generated_visible");
+                }, 800);
+            }
+
+            // ═══════════════════════════════════════════════════════════════
+            // VIEW: Public contact (scanned QR)
+            // ═══════════════════════════════════════════════════════════════
+            function renderPublicContact(token) {
+                trackEvent("view_public_contact", { entry_point: "qr_scan" });
+
+                app().innerHTML = `
     <div class="fade-in">
       <div style="text-align:center; padding: 20px 0 28px;">
         <span class="wordmark" style="display:block; margin-bottom:20px;">QR Contact</span>
@@ -629,30 +741,37 @@ function renderPublicContact(token) {
     </div>
   `;
 
-  const ICONS = {
-    phone:    { icon: '📞', label: 'Phone',    href: v => 'tel:' + v },
-    email:    { icon: '✉️', label: 'Email',    href: v => 'mailto:' + v },
-    company:  { icon: '🏢', label: 'Company',  href: null },
-    website:  { icon: '🌐', label: 'Website',  href: v => v },
-    linkedin: { icon: '💼', label: 'LinkedIn', href: v => v },
-  };
+                const ICONS = {
+                    phone: { icon: "📞", label: "Phone", href: (v) => "tel:" + v },
+                    email: { icon: "✉️", label: "Email", href: (v) => "mailto:" + v },
+                    company: { icon: "🏢", label: "Company", href: null },
+                    website: { icon: "🌐", label: "Website", href: (v) => v },
+                    linkedin: { icon: "💼", label: "LinkedIn", href: (v) => v },
+                };
 
-  apiGetContact(token).then(data => {
-    $('#pub-avatar').textContent = getInitials(data.name);
-    $('#pub-name').textContent   = data.name;
-    if (data.details.company) {
-      $('#pub-company').textContent = data.details.company;
-    }
+                apiGetContact(token)
+                    .then((data) => {
+                        $("#pub-avatar").textContent = getInitials(data.name);
+                        $("#pub-name").textContent = data.name;
+                        if (data.details.company) {
+                            $("#pub-company").textContent = data.details.company;
+                        }
 
-    const rows = Object.entries(ICONS)
-      .filter(([type]) => data.details[type])
-      .map(([type, cfg]) => {
-        const val  = data.details[type];
-        const href = cfg.href ? cfg.href(val) : null;
-        const inner = href
-          ? `<a href="${esc(href)}" class="detail-value">${esc(val)}</a>`
-          : `<span class="detail-value">${esc(val)}</span>`;
-        return `
+                        const fields_present = {};
+                        ["phone", "email", "company", "website", "linkedin"].forEach((f) => {
+                            if (data.details?.[f]) fields_present[f] = true;
+                        });
+                        trackEvent("public_contact_fields_shown", fields_present);
+
+                        const rows = Object.entries(ICONS)
+                            .filter(([type]) => data.details[type])
+                            .map(([type, cfg]) => {
+                                const val = data.details[type];
+                                const href = cfg.href ? cfg.href(val) : null;
+                                const inner = href
+                                    ? `<a href="${esc(href)}" class="detail-value">${esc(val)}</a>`
+                                    : `<span class="detail-value">${esc(val)}</span>`;
+                                return `
           <div class="detail-row">
             <div class="detail-icon">${cfg.icon}</div>
             <div style="min-width:0; flex:1;">
@@ -660,53 +779,54 @@ function renderPublicContact(token) {
               ${inner}
             </div>
           </div>`;
-      });
+                            });
 
-    $('#pub-details').innerHTML = rows.length
-      ? rows.join('')
-      : '<p style="color:var(--muted); text-align:center; padding:10px 0;">No details available.</p>';
+                        $("#pub-details").innerHTML = rows.length
+                            ? rows.join("")
+                            : '<p style="color:var(--muted); text-align:center; padding:10px 0;">No details available.</p>';
 
-    $('#save-btn').addEventListener('click', () => {
-      window.location.href = API_BASE + '?action=vcard&token=' + encodeURIComponent(token);
-    });
+                        $("#save-btn").addEventListener("click", () => {
+                            trackEvent("click_save_to_contacts", { method: "vcard_download" });
+                            window.location.href = API_BASE + "?action=vcard&token=" + encodeURIComponent(token);
+                        });
+                    })
+                    .catch((err) => {
+                        $("#pub-name").textContent = "Contact not found";
+                        $("#pub-details").innerHTML =
+                            `<p style="color:var(--muted); text-align:center; padding:10px 0;">${esc(err.message)}</p>`;
+                        $("#save-btn").disabled = true;
+                        trackEvent("public_contact_error", { error: "not_found_or_invalid" });
+                    });
+            }
 
-  }).catch(err => {
-    $('#pub-name').textContent   = 'Contact not found';
-    $('#pub-details').innerHTML  = `<p style="color:var(--muted); text-align:center; padding:10px 0;">${esc(err.message)}</p>`;
-    $('#save-btn').disabled = true;
-  });
-}
+            // ═══════════════════════════════════════════════════════════════
+            // INIT
+            // ═══════════════════════════════════════════════════════════════
+            (function init() {
+                const params = new URLSearchParams(window.location.search);
+                const token = params.get("token");
 
-// ═══════════════════════════════════════════════════════════════
-// INIT — decide which view to render
-// ═══════════════════════════════════════════════════════════════
-(function init() {
-  const params = new URLSearchParams(window.location.search);
-  const token  = params.get('token');
+                if (token) {
+                    trackEvent("page_load_public", { has_token: true });
+                    renderPublicContact(token);
+                    return;
+                }
 
-  // ── Public view (someone else scanned the QR)
-  if (token) {
-    renderPublicContact(token);
-    return;
-  }
+                const saved = loadProfile();
 
-  // ── Owner view — check localStorage
-  const saved = loadProfile();
-
-  if (saved && saved.profile_id && saved.token) {
-    const mode = loadViewMode();
-    if (mode === 'qr') {
-      // Returning to app — go straight to QR
-      renderQR(saved);
-    } else {
-      // They were last on the form (editing) — prefill it
-      renderForm(saved);
-    }
-  } else {
-    // First-time visitor
-    renderForm({});
-  }
-})();
-</script>
-</body>
+                if (saved && saved.profile_id && saved.token) {
+                    trackEvent("page_load_owner_returning");
+                    const mode = loadViewMode();
+                    if (mode === "qr") {
+                        renderQR(saved);
+                    } else {
+                        renderForm(saved);
+                    }
+                } else {
+                    trackEvent("page_load_owner_first_time");
+                    renderForm({});
+                }
+            })();
+        </script>
+    </body>
 </html>

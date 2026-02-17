@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ShareMyContact — Share your contact in seconds</title>
+  <meta name="description" content="Stop spelling out your number. ShareMyContact generates a QR code for your contact details instantly. No app, no account, no friction."/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+
+  <style>
+    /* ── Tokens ─────────────────────────────────────────────── */
+    :root {
+      --bg:        #0b0b0d;
+      --bg2:       #101013;
+      --bg3:       #141417;
+      --surface:   #18181c;
+      --border:    #252528;
+      --border2:   #2e2e33;
+      --muted:     #45454f;
+      --sub:       #7c7c8c;
+      --text:      #dddde5;
+      --bright:    #f0f0f5;
+      --accent:    #6ee7b7;
+      --accent2:   #34d399;
+      --accent-dk: #065f46;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html {
+      scroll-behavior: smooth;
+      font-size: 16px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 400;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* ── Typography ─────────────────────────────────────────── */
+    .display {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: -.02em;
+      color: var(--bright);
+    }
+    .display-italic {
+      font-style: italic;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .mono {
+      font-family: 'DM Mono', monospace;
+    }
+
+    /* ── Grain overlay ──────────────────────────────────────── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+      opacity: .022;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* ── Horizontal rule ────────────────────────────────────── */
+    .rule { border: none; border-top: 1px solid var(--border); }
+
+    /* ── Buttons ────────────────────────────────────────────── */
+    .btn-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--accent);
+      color: #04120d;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600;
+      font-size: 15px;
+      border: none;
+      border-radius: 9px;
+      padding: 15px 28px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: opacity .15s, transform .12s;
+      letter-spacing: .01em;
+    }
+    .btn-cta:hover  { opacity: .87; }
+    .btn-cta:active { transform: scale(.97); }
+
+    .btn-ghost {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: transparent;
+      color: var(--sub);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 500;
+      font-size: 14px;
+      border: 1px solid var(--border2);
+      border-radius: 9px;
+      padding: 13px 24px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: border-color .15s, color .15s;
+    }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── Nav ────────────────────────────────────────────────── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      border-bottom: 1px solid transparent;
+      transition: background .3s, border-color .3s;
+    }
+    nav.scrolled {
+      background: rgba(11,11,13,.88);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-color: var(--border);
+    }
+    .nav-inner {
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 0 24px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* ── Sections ───────────────────────────────────────────── */
+    .section { padding: 100px 24px; }
+    .section-sm { padding: 72px 24px; }
+    .container { max-width: 1160px; margin: 0 auto; }
+    .container-narrow { max-width: 760px; margin: 0 auto; }
+
+    /* ── Hero ───────────────────────────────────────────────── */
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(110,231,183,.07);
+      border: 1px solid rgba(110,231,183,.18);
+      border-radius: 100px;
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--accent);
+      font-family: 'DM Mono', monospace;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      margin-bottom: 28px;
+    }
+    .hero-eyebrow-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: pulse 2.2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: .5; transform: scale(.75); }
+    }
+
+    /* ── Feature cards ──────────────────────────────────────── */
+    .feature-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px 28px;
+      transition: border-color .2s;
+    }
+    .feature-card:hover { border-color: var(--border2); }
+    .feature-icon {
+      width: 44px; height: 44px;
+      border-radius: 10px;
+      background: rgba(110,231,183,.07);
+      border: 1px solid rgba(110,231,183,.15);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      margin-bottom: 18px;
+    }
+
+    /* ── Steps ──────────────────────────────────────────────── */
+    .step-num {
+      font-family: 'Playfair Display', serif;
+      font-weight: 900;
+      font-size: 48px;
+      line-height: 1;
+      color: var(--border2);
+      letter-spacing: -.03em;
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    /* ── Testimonials ───────────────────────────────────────── */
+    .testimonial {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 28px 26px;
+    }
+    .stars { color: var(--accent); font-size: 14px; letter-spacing: 2px; margin-bottom: 14px; }
+    .avatar-ring {
+      width: 38px; height: 38px;
+      border-radius: 50%;
+      border: 1px solid var(--border2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+
+    /* ── QR mockup ──────────────────────────────────────────── */
+    .qr-mockup {
+      width: 180px; height: 180px;
+      background: #d4d4d8;
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    /* Fake QR pattern using CSS */
+    .qr-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 3px;
+      width: 140px; height: 140px;
+    }
+    .qr-cell {
+      border-radius: 2px;
+      background: #18181c;
+    }
+
+    /* ── Phone mockup ───────────────────────────────────────── */
+    .phone-frame {
+      width: 260px;
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 36px;
+      padding: 16px 12px;
+      box-shadow: 0 40px 80px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.03) inset;
+    }
+    .phone-screen {
+      background: var(--bg2);
+      border-radius: 26px;
+      padding: 24px 18px;
+      min-height: 420px;
+      border: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+    .phone-notch {
+      width: 72px; height: 7px;
+      background: var(--border2);
+      border-radius: 100px;
+      margin: 0 auto 20px;
+    }
+
+    /* ── CTA section ────────────────────────────────────────── */
+    .cta-section {
+      background: linear-gradient(160deg, #0f1f19 0%, var(--bg) 60%);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* ── Divider line with label ────────────────────────────── */
+    .labeled-divider {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      color: var(--muted);
+      font-size: 11px;
+      font-family: 'DM Mono', monospace;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .labeled-divider::before,
+    .labeled-divider::after {
+      content: '';
+      flex: 1;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ── Scroll reveal ──────────────────────────────────────── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(22px);
+      transition: opacity .55s ease, transform .55s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .reveal-delay-1 { transition-delay: .1s; }
+    .reveal-delay-2 { transition-delay: .18s; }
+    .reveal-delay-3 { transition-delay: .26s; }
+    .reveal-delay-4 { transition-delay: .34s; }
+
+    /* ── Stat counter ───────────────────────────────────────── */
+    .stat-val {
+      font-family: 'Playfair Display', serif;
+      font-weight: 900;
+      font-size: 42px;
+      color: var(--bright);
+      letter-spacing: -.03em;
+      line-height: 1;
+    }
+
+    /* ── Badge ──────────────────────────────────────────────── */
+    .badge {
+      display: inline-block;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 3px 10px;
+      font-size: 11px;
+      font-family: 'DM Mono', monospace;
+      color: var(--sub);
+      letter-spacing: .05em;
+    }
+
+    /* ── Highlight text ─────────────────────────────────────── */
+    .hl { color: var(--accent); }
+    .hl-underline {
+      text-decoration: underline;
+      text-decoration-color: rgba(110,231,183,.35);
+      text-underline-offset: 5px;
+    }
+
+    /* ── Responsive tweaks ──────────────────────────────────── */
+    @media (max-width: 640px) {
+      .section { padding: 72px 20px; }
+      .section-sm { padding: 52px 20px; }
+      .phone-frame { width: 220px; }
+      .qr-mockup { width: 140px; height: 140px; }
+      .qr-grid { width: 110px; height: 110px; gap: 2px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════════════════
+     NAV
+════════════════════════════════════════════════════════════ -->
+<nav id="navbar">
+  <div class="nav-inner">
+    <a href="#" style="text-decoration:none; display:flex; align-items:center; gap:10px;">
+      <div style="width:30px;height:30px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="1" y="1" width="6" height="6" rx="1" fill="#04120d"/>
+          <rect x="9" y="1" width="6" height="6" rx="1" fill="#04120d"/>
+          <rect x="1" y="9" width="6" height="6" rx="1" fill="#04120d"/>
+          <rect x="10" y="10" width="2" height="2" rx=".5" fill="#04120d"/>
+          <rect x="13" y="10" width="2" height="2" rx=".5" fill="#04120d"/>
+          <rect x="10" y="13" width="2" height="2" rx=".5" fill="#04120d"/>
+          <rect x="13" y="13" width="2" height="2" rx=".5" fill="#04120d"/>
+        </svg>
+      </div>
+      <span style="font-family:'DM Mono',monospace; font-size:13px; font-weight:500; color:var(--text); letter-spacing:.02em;">ShareMyContact</span>
+    </a>
+
+    <div style="display:flex; align-items:center; gap:12px;">
+      <span class="badge" style="display:none;" id="nav-badge">Free · No signup</span>
+      <a href="./index.html" class="btn-cta" style="padding:10px 20px; font-size:13px;">
+        Try it free
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7h8M8 4l3 3-3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- ════════════════════════════════════════════════════════════
+     HERO
+════════════════════════════════════════════════════════════ -->
+<section class="section" style="padding-top: 160px; padding-bottom: 120px;">
+  <div class="container">
+    <div style="max-width: 880px;">
+
+      <div class="hero-eyebrow reveal">
+        <span class="hero-eyebrow-dot"></span>
+        No app · No account · No friction
+      </div>
+
+      <h1 class="display reveal reveal-delay-1" style="font-size: clamp(46px, 8vw, 88px); margin-bottom: 28px;">
+        Your contact.<br>
+        Shared in a <span class="display-italic">single scan.</span>
+      </h1>
+
+      <p class="reveal reveal-delay-2" style="font-size: clamp(17px, 2.2vw, 21px); color: var(--sub); font-weight: 300; max-width: 540px; line-height: 1.65; margin-bottom: 44px;">
+        Stop spelling out your number. Stop losing leads. Generate a QR code for all your contact details in seconds — and share it with anyone, anywhere, instantly.
+      </p>
+
+      <div class="reveal reveal-delay-3" style="display:flex; flex-wrap:wrap; align-items:center; gap:14px; margin-bottom: 60px;">
+        <a href="./index.html" class="btn-cta" style="font-size:16px; padding:16px 32px;">
+          Create your card
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+        <span style="font-size:13px; color:var(--muted); font-family:'DM Mono',monospace;">Takes under 30 seconds</span>
+      </div>
+
+      <!-- Stats strip -->
+      <div class="reveal reveal-delay-4" style="display:flex; flex-wrap:wrap; gap:40px; padding-top:40px; border-top:1px solid var(--border);">
+        <div>
+          <div class="stat-val">0</div>
+          <div style="font-size:13px; color:var(--sub); margin-top:6px;">Accounts required</div>
+        </div>
+        <div>
+          <div class="stat-val">&lt;30s</div>
+          <div style="font-size:13px; color:var(--sub); margin-top:6px;">To get your QR code</div>
+        </div>
+        <div>
+          <div class="stat-val">∞</div>
+          <div style="font-size:13px; color:var(--sub); margin-top:6px;">Times you can share it</div>
+        </div>
+        <div>
+          <div class="stat-val">Free</div>
+          <div style="font-size:13px; color:var(--sub); margin-top:6px;">Forever, no catches</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════
+     PROBLEM SECTION
+════════════════════════════════════════════════════════════ -->
+<section class="section-sm" style="background: var(--bg2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+  <div class="container">
+
+    <div class="labeled-divider reveal" style="margin-bottom: 60px;">The problem</div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1px; background: var(--border);">
+
+      <div class="reveal" style="background: var(--bg2); padding: 40px 32px;">
+        <div style="font-size:28px; margin-bottom:16px;">😩</div>
+        <h3 style="font-size:18px; font-weight:600; color:var(--bright); margin-bottom:10px; line-height:1.3;">"Can you spell that again?"</h3>
+        <p style="font-size:14px; color:var(--sub); line-height:1.65;">You're at a conference. You've got ten seconds. You end up spelling your email address letter by letter while the other person fumbles with their phone.</p>
+      </div>
+
+      <div class="reveal reveal-delay-1" style="background: var(--bg2); padding: 40px 32px;">
+        <div style="font-size:28px; margin-bottom:16px;">📵</div>
+        <h3 style="font-size:18px; font-weight:600; color:var(--bright); margin-bottom:10px; line-height:1.3;">Business cards end up in a drawer.</h3>
+        <p style="font-size:14px; color:var(--sub); line-height:1.65;">Printed, handed out, forgotten. Most business cards are never saved as contacts. The connection fades before it even starts.</p>
+      </div>
+
+      <div class="reveal reveal-delay-2" style="background: var(--bg2); padding: 40px 32px;">
+        <div style="font-size:28px; margin-bottom:16px;">🤦</div>
+        <h3 style="font-size:18px; font-weight:600; color:var(--bright); margin-bottom:10px; line-height:1.3;">Typos kill opportunities.</h3>
+        <p style="font-size:14px; color:var(--sub); line-height:1.65;">One wrong digit. One missed letter. The follow-up never arrives. The deal never closes. All because of manual entry.</p>
+      </div>
+
+    </div>
+
+    <div class="reveal" style="margin-top: 48px; padding: 32px; background: linear-gradient(135deg, rgba(110,231,183,.05) 0%, transparent 100%); border: 1px solid rgba(110,231,183,.12); border-radius: 14px; max-width:680px; margin-left:auto; margin-right:auto; text-align:center;">
+      <p style="font-size:clamp(18px, 3vw, 22px); font-family:'Playfair Display',serif; font-style:italic; font-weight:700; color:var(--bright); line-height:1.4;">
+        "There should be a smarter way to exchange contact details."
+      </p>
+      <p style="font-size:14px; color:var(--muted); margin-top:12px;">There is. You're looking at it.</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════
+     HOW IT WORKS — 3 steps
+════════════════════════════════════════════════════════════ -->
+<section class="section">
+  <div class="container">
+
+    <div class="labeled-divider reveal" style="margin-bottom: 60px;">How it works</div>
+
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:40px; margin-bottom: 72px;">
+
+      <div class="reveal">
+        <span class="step-num">01</span>
+        <h3 style="font-size:19px; font-weight:600; color:var(--bright); margin-bottom:10px;">Enter your details.</h3>
+        <p style="font-size:14px; color:var(--sub); line-height:1.7;">Name, phone, email, company, website, LinkedIn. Fill in what matters. Skip what doesn't.</p>
+      </div>
+
+      <div class="reveal reveal-delay-1">
+        <span class="step-num">02</span>
+        <h3 style="font-size:19px; font-weight:600; color:var(--bright); margin-bottom:10px;">Your QR code is ready.</h3>
+        <p style="font-size:14px; color:var(--sub); line-height:1.7;">Instant. Permanent. Yours. Open the page again — it's already there, no re-entry needed.</p>
+      </div>
+
+      <div class="reveal reveal-delay-2">
+        <span class="step-num">03</span>
+        <h3 style="font-size:19px; font-weight:600; color:var(--bright); margin-bottom:10px;">They scan. It's saved.</h3>
+        <p style="font-size:14px; color:var(--sub); line-height:1.7;">One scan downloads a contact card. No typing. No errors. Your details land perfectly in their phone.</p>
+      </div>
+
+    </div>
+
+    <!-- Visual demo strip -->
+    <div class="reveal" style="display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:24px; padding: 48px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+
+      <!-- Step A — Form filled -->
+      <div style="text-align:center;">
+        <div style="background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:20px 18px; width:190px; margin:0 auto 12px;">
+          <div style="text-align:left; margin-bottom:12px;">
+            <div style="font-size:10px; font-family:'DM Mono',monospace; color:var(--muted); margin-bottom:5px; text-transform:uppercase; letter-spacing:.05em;">Full name</div>
+            <div style="background:var(--bg2); border:1px solid var(--border2); border-radius:6px; padding:8px 10px; font-size:13px; color:var(--text);">Jane Smith</div>
+          </div>
+          <div style="text-align:left; margin-bottom:12px;">
+            <div style="font-size:10px; font-family:'DM Mono',monospace; color:var(--muted); margin-bottom:5px; text-transform:uppercase; letter-spacing:.05em;">Email</div>
+            <div style="background:var(--bg2); border:1px solid var(--border2); border-radius:6px; padding:8px 10px; font-size:13px; color:var(--text);">jane@acme.co</div>
+          </div>
+          <div style="background:var(--accent); border-radius:6px; padding:9px; text-align:center; font-size:12px; font-weight:600; color:#04120d;">Generate QR →</div>
+        </div>
+        <span style="font-size:11px; font-family:'DM Mono',monospace; color:var(--muted);">Fill once</span>
+      </div>
+
+      <!-- Arrow -->
+      <div style="color:var(--muted); font-size:24px; flex-shrink:0;">→</div>
+
+      <!-- Step B — QR shown -->
+      <div style="text-align:center;">
+        <div style="background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:20px 18px; width:190px; margin:0 auto 12px; display:flex; flex-direction:column; align-items:center; gap:14px;">
+          <div class="qr-mockup" style="width:120px; height:120px;">
+            <div class="qr-grid" style="width:96px; height:96px; gap:2.5px;">
+              <!-- Simplified QR pattern representation -->
+              <script>
+                // Generate a visually plausible QR grid pattern
+                const patternStr = `
+                  1,1,1,1,1,1,1,
+                  1,0,0,0,0,0,1,
+                  1,0,1,1,1,0,1,
+                  1,0,1,1,1,0,1,
+                  1,0,1,1,1,0,1,
+                  1,0,0,0,0,0,1,
+                  1,1,1,1,1,1,1
+                `.trim().split(',').map(v=>v.trim());
+                // output done via static HTML below
+              </script>
+              <!-- Static QR-like pattern -->
+              <!-- Row 1: finder top-left -->
+              <div class="qr-cell" style="background:#18181c;grid-column:1;grid-row:1;border-radius:3px 0 0 0;"></div>
+              <div class="qr-cell" style="background:#18181c;"></div>
+              <div class="qr-cell" style="background:#18181c;"></div>
+              <div class="qr-cell" style="background:#18181c;"></div>
+              <div class="qr-cell" style="background:#18181c;"></div>
+              <div class="qr-cell" style="background:#18181c;"></div>
+              <div class="qr-cell" style="background:#18181c;grid-column:7;grid-row:1;border-radius:0 3px 0 0;"></div>
+              <!-- Row 2 -->
+              <div class="qr-cell" style="background:#18181c;"></div>
+              <div class="qr-cell" style="background:#d4d4d8;"></div>
+              <div class="qr-cell" style="background:#d4d4d8;"></div>
+              <div class="qr-cell" style="background:#d4d4d8;"></div>
+              <div class="qr-cell" style="background:#d4d4d8;"></div>
+              <div class="qr-cell" style="background:#d4d4d8;"></div>
+              <div class="qr-cell" style="background:#18181c;"></div>
+              <!-- Row 3 -->
+              <div class="qr-cell" style="background:#18181c;"></div>
+              <div class="qr-cell" style="background:#d4d4d8;"></div>
+              <div class="qr-cell" style="background:#18181c;"></div>
+              <div class="qr-cell" style="background:#18181c;"></div>
+              <div class="qr-cell" style="background:#18181c;"></div>
+              <div class="qr-cell" style="background:#d4d4d8;"></div>
+              <div class="qr-cell" style="background:#18181c;"></div>
+              <!-- Row 4 -->
+              <div class="qr-cell" style="background:#18181c;"></div>
+              <div class="qr-cell" style="background:#d4d4d8;"></div>
+              <div class="qr-cell" style="background:#18181c;"></div>
+              <div class="qr-cell" style="background:#d4d4d8;"></div>
+              <div class="qr-cell" style="background:#18181c;"></div>
+              <div class="qr-cell" style="background:#d4d4d8;"></div>
+              <div class="qr-cell" style="background:#18181c;"></div>
+              <!-- Row 5 -->
+              <div class="qr-cell" style="background:#18181c;"></div>
+              <div class="qr-cell" style="background:#d4d4d8;"></div>
+              <div class="qr-cell" style="background:#18181c;"></div>
+              <div class="qr-cell" style="background:#18181c;"></div>
+              <div class="qr-cell" style="background:#18181c;"></div>
+              <div class="qr-cell" style="background:#d4d4d8;"></div>
+              <div class="qr-cell" style="background:#18181c;"></div>
+              <!-- Row 6 -->
+              <div class="qr-cell" style="background:#18181c;"></div>
+              <div class="qr-cell" style="background:#d4d4d8;"></div>
+              <div class="qr-cell" style="background:#d4d4d8;"></div>
+              <div class="qr-cell" style="background:#d4d4d8;"></div>
+              <div class="qr-cell" style="background:#d4d4d8;"></div>
+              <div class="qr-cell" style="background:#d4d4d8;"></div>
+              <div class="qr-cell" style="background:#18181c;"></div>
+              <!-- Row 7 -->
+              <div class="qr-cell" style="background:#18181c;grid-column:1;grid-row:7;border-radius:0 0 0 3px;"></div>
+              <div class="qr-cell" style="background:#18181c;"></div>
+              <div class="qr-cell" style="background:#18181c;"></div>
+              <div class="qr-cell" style="background:#18181c;"></div>
+              <div class="qr-cell" style="background:#18181c;"></div>
+              <div class="qr-cell" style="background:#18181c;"></div>
+              <div class="qr-cell" style="background:#18181c;grid-column:7;grid-row:7;border-radius:0 0 3px 0;"></div>
+            </div>
+          </div>
+          <div style="font-size:12px; color:var(--sub); font-family:'DM Mono',monospace;">jane.sharemycontact.io</div>
+        </div>
+        <span style="font-size:11px; font-family:'DM Mono',monospace; color:var(--muted);">Share instantly</span>
+      </div>
+
+      <!-- Arrow -->
+      <div style="color:var(--muted); font-size:24px; flex-shrink:0;">→</div>
+
+      <!-- Step C — Saved to contacts -->
+      <div style="text-align:center;">
+        <div style="background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:20px 18px; width:190px; margin:0 auto 12px; display:flex; flex-direction:column; align-items:center; gap:12px;">
+          <div class="avatar-ring" style="width:52px; height:52px; font-size:22px; background: rgba(110,231,183,.07);">👤</div>
+          <div>
+            <div style="font-size:14px; font-weight:600; color:var(--bright); margin-bottom:2px;">Jane Smith</div>
+            <div style="font-size:11px; color:var(--sub);">jane@acme.co</div>
+          </div>
+          <div style="background:var(--accent); border-radius:6px; padding:9px 14px; text-align:center; font-size:12px; font-weight:600; color:#04120d; width:100%;">
+            ✓ Saved to Contacts
+          </div>
+        </div>
+        <span style="font-size:11px; font-family:'DM Mono',monospace; color:var(--muted);">No typing needed</span>
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════
+     FEATURES GRID
+════════════════════════════════════════════════════════════ -->
+<section class="section-sm" style="background: var(--bg2); border-top:1px solid var(--border);">
+  <div class="container">
+
+    <div class="labeled-divider reveal" style="margin-bottom:60px;">Why ShareMyContact</div>
+
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:16px;">
+
+      <div class="feature-card reveal">
+        <div class="feature-icon">⚡</div>
+        <h3 style="font-size:17px; font-weight:600; color:var(--bright); margin-bottom:8px;">Instant QR generation</h3>
+        <p style="font-size:14px; color:var(--sub); line-height:1.65;">Enter your details once. Your QR code appears immediately. No waiting, no processing, no queues.</p>
+      </div>
+
+      <div class="feature-card reveal reveal-delay-1">
+        <div class="feature-icon">🔒</div>
+        <h3 style="font-size:17px; font-weight:600; color:var(--bright); margin-bottom:8px;">Zero account required</h3>
+        <p style="font-size:14px; color:var(--sub); line-height:1.65;">No email, no password, no profile. You own your data. Walk away knowing nothing tracks you.</p>
+      </div>
+
+      <div class="feature-card reveal reveal-delay-2">
+        <div class="feature-icon">💾</div>
+        <h3 style="font-size:17px; font-weight:600; color:var(--bright); margin-bottom:8px;">Remembered forever</h3>
+        <p style="font-size:14px; color:var(--sub); line-height:1.65;">Open the app at any event and your QR code is already there. Enter once, share infinitely.</p>
+      </div>
+
+      <div class="feature-card reveal">
+        <div class="feature-icon">📱</div>
+        <h3 style="font-size:17px; font-weight:600; color:var(--bright); margin-bottom:8px;">vCard compatible</h3>
+        <p style="font-size:14px; color:var(--sub); line-height:1.65;">Scanning downloads a proper contact file. Works with every phone, every OS, every contacts app — no exceptions.</p>
+      </div>
+
+      <div class="feature-card reveal reveal-delay-1">
+        <div class="feature-icon">🔗</div>
+        <h3 style="font-size:17px; font-weight:600; color:var(--bright); margin-bottom:8px;">Shareable link too</h3>
+        <p style="font-size:14px; color:var(--sub); line-height:1.65;">Not in person? Send your contact link via message, email, or anywhere. They tap, they save. Done.</p>
+      </div>
+
+      <div class="feature-card reveal reveal-delay-2">
+        <div class="feature-icon">✏️</div>
+        <h3 style="font-size:17px; font-weight:600; color:var(--bright); margin-bottom:8px;">Update anytime</h3>
+        <p style="font-size:14px; color:var(--sub); line-height:1.65;">Changed jobs? New number? Update your card in seconds. Same QR, always current. Nothing to reprint.</p>
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════
+     TESTIMONIALS
+════════════════════════════════════════════════════════════ -->
+<section class="section">
+  <div class="container">
+
+    <div class="labeled-divider reveal" style="margin-bottom:60px;">What people say</div>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:16px;">
+
+      <div class="testimonial reveal">
+        <div class="stars">★★★★★</div>
+        <p style="font-size:15px; color:var(--text); line-height:1.65; margin-bottom:20px;">"I used to hand out paper cards at trade shows. Now I just show my phone. Three people saved my contact in the time it would've taken to spell my company name."</p>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div class="avatar-ring">🧑‍💼</div>
+          <div>
+            <div style="font-size:13px; font-weight:600; color:var(--bright);">Marcus K.</div>
+            <div style="font-size:12px; color:var(--muted);">Sales Director</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="testimonial reveal reveal-delay-1">
+        <div class="stars">★★★★★</div>
+        <p style="font-size:15px; color:var(--text); line-height:1.65; margin-bottom:20px;">"The fact that it remembers everything is the killer feature. I just open it at every meeting. It's become the first thing I show new people."</p>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div class="avatar-ring">👩‍💻</div>
+          <div>
+            <div style="font-size:13px; font-weight:600; color:var(--bright);">Priya M.</div>
+            <div style="font-size:12px; color:var(--muted);">Freelance Developer</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="testimonial reveal reveal-delay-2">
+        <div class="stars">★★★★★</div>
+        <p style="font-size:15px; color:var(--text); line-height:1.65; margin-bottom:20px;">"Simple is an understatement. I set it up in under a minute. The QR code scans perfectly every time. Nothing to explain, nothing to install."</p>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div class="avatar-ring">🧑‍🎨</div>
+          <div>
+            <div style="font-size:13px; font-weight:600; color:var(--bright);">Tom B.</div>
+            <div style="font-size:12px; color:var(--muted);">Creative Consultant</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════
+     CTA SECTION
+════════════════════════════════════════════════════════════ -->
+<section class="section cta-section">
+  <div class="container">
+    <div class="container-narrow" style="text-align:center;">
+
+      <div class="hero-eyebrow reveal" style="justify-content:center; margin-bottom:24px;">
+        <span class="hero-eyebrow-dot"></span>
+        No signup · No credit card · Free forever
+      </div>
+
+      <h2 class="display reveal reveal-delay-1" style="font-size: clamp(36px, 6vw, 68px); margin-bottom: 20px;">
+        Ready to share<br><span class="display-italic">smarter?</span>
+      </h2>
+
+      <p class="reveal reveal-delay-2" style="font-size:17px; color:var(--sub); font-weight:300; line-height:1.65; margin-bottom:44px;">
+        Your contact card is 30 seconds away. No installation, no registration — just your details, a QR code, and a faster way to connect.
+      </p>
+
+      <div class="reveal reveal-delay-3" style="display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:14px;">
+        <a href="./index.html" class="btn-cta" style="font-size:16px; padding:17px 36px;">
+          Create your free card
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+        <span style="font-size:13px; color:var(--muted);">Nothing to install. Nothing to sign up for.</span>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════
+     FOOTER
+════════════════════════════════════════════════════════════ -->
+<footer style="border-top: 1px solid var(--border); padding: 48px 24px;">
+  <div class="container">
+    <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:24px;">
+
+      <div style="display:flex; align-items:center; gap:10px;">
+        <div style="width:26px;height:26px;background:var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center; flex-shrink:0;">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+            <rect x="1" y="1" width="6" height="6" rx="1" fill="#04120d"/>
+            <rect x="9" y="1" width="6" height="6" rx="1" fill="#04120d"/>
+            <rect x="1" y="9" width="6" height="6" rx="1" fill="#04120d"/>
+            <rect x="10" y="10" width="2" height="2" rx=".5" fill="#04120d"/>
+            <rect x="13" y="10" width="2" height="2" rx=".5" fill="#04120d"/>
+            <rect x="10" y="13" width="2" height="2" rx=".5" fill="#04120d"/>
+            <rect x="13" y="13" width="2" height="2" rx=".5" fill="#04120d"/>
+          </svg>
+        </div>
+        <div>
+          <div style="font-family:'DM Mono',monospace; font-size:12px; color:var(--text); font-weight:500;">ShareMyContact</div>
+          <div style="font-size:11px; color:var(--muted); margin-top:1px;">The simplest contact sharing tool on the web.</div>
+        </div>
+      </div>
+
+      <div style="display:flex; flex-wrap:wrap; align-items:center; gap:24px;">
+        <a href="./index.html" style="font-size:13px; color:var(--sub); text-decoration:none; transition: color .15s;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--sub)'">Create a card</a>
+        <span style="font-size:13px; color:var(--muted); font-family:'DM Mono',monospace;">Free · Private · No login</span>
+      </div>
+
+    </div>
+
+    <div style="border-top: 1px solid var(--border); margin-top:32px; padding-top:24px; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px;">
+      <p style="font-size:12px; color:var(--muted);">© 2026 ShareMyContact. Built for the one tool every professional needs.</p>
+      <p style="font-size:12px; color:var(--muted); font-family:'DM Mono',monospace;">No cookies · No tracking · No nonsense</p>
+    </div>
+  </div>
+</footer>
+
+<!-- ════════════════════════════════════════════════════════════
+     JS: Scroll effects
+════════════════════════════════════════════════════════════ -->
+<script>
+  // Nav scroll class
+  const navbar = document.getElementById('navbar');
+  const navBadge = document.getElementById('nav-badge');
+
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 40) {
+      navbar.classList.add('scrolled');
+      if (navBadge) navBadge.style.display = 'inline-block';
+    } else {
+      navbar.classList.remove('scrolled');
+      if (navBadge) navBadge.style.display = 'none';
+    }
+  }, { passive: true });
+
+  // Reveal on scroll (IntersectionObserver)
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12 });
+
+  reveals.forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
