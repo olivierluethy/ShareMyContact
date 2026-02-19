@@ -27,7 +27,7 @@ export default function ContactPage() {
 
     try {
       // ACHTUNG: Ersetze dies durch deine echte PHP-URL (z.B. https://api.deineseite.ch)
-      const response = await fetch("https://sharemycontact/contact.php", {
+      const response = await fetch("https://sharemycontact.com/contact.php", {
         method: "POST",
         body: formData, // Schickt die Daten als klassischen POST-Request
       })
