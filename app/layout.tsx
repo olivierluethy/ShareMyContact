@@ -11,6 +11,11 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 const jetbrainsMono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-jetbrains-mono' })
 
 export const metadata: Metadata = {
+  icons: {
+    icon: '/favicon.svg', // Pfad zum public-Ordner
+    shortcut: '/favicon.svg',
+    apple: '/favicon.svg',
+  },
   metadataBase: new URL('https://v0-next-js-contact-sharing.vercel.app'),
   title: {
     default: 'ShareMyContact - Privacy-First Digital Contact Sharing',

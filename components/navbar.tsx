@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { trackEvent } from "@/lib/gtag"
 import { useState } from "react"
+import Image from 'next/image'
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -23,7 +24,15 @@ export function Navbar() {
       <nav className="mx-auto flex h-16 max-w-5xl items-center justify-between px-6">
         <Link href="/" onClick={() => trackEvent("click", "navigation", "logo_home")} className="flex items-center gap-2 transition-opacity hover:opacity-80">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-            <Share2 className="h-4 w-4 text-primary-foreground" />
+            <div className="relative h-8 w-8 overflow-hidden rounded-lg">
+  <Image 
+    src="/favicon.svg"
+    alt="Teilen"
+    fill
+    className="object-cover" // Füllt das Quadrat komplett aus
+  />
+</div>
+
           </div>
           <span className="text-lg font-semibold tracking-tight text-foreground">
             ShareMyContact
