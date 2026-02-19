@@ -13,7 +13,7 @@ export async function generateStaticParams() {
   return blogPosts.map((post) => ({ slug: post.slug }))
 }
 
-const SITE_URL = "https://v0-next-js-contact-sharing.vercel.app"
+const SITE_URL = "https://sharemycontact.com"
 
 export async function generateMetadata({
   params,

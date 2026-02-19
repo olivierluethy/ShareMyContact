@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     shortcut: '/favicon.svg',
     apple: '/favicon.svg',
   },
-  metadataBase: new URL('https://v0-next-js-contact-sharing.vercel.app'),
+  metadataBase: new URL('https://sharemycontact.com'),
   title: {
     default: 'ShareMyContact - Privacy-First Digital Contact Sharing',
     template: '%s | ShareMyContact',
@@ -33,14 +33,14 @@ export const metadata: Metadata = {
     'networking',
   ],
   alternates: {
-    canonical: 'https://v0-next-js-contact-sharing.vercel.app',
+    canonical: 'https://sharemycontact.com',
   },
   openGraph: {
     title: 'ShareMyContact - Privacy-First Digital Contact Sharing',
     description:
       'Create a beautiful QR code and shareable link for your contact info. No accounts, no apps, zero server storage.',
     type: 'website',
-    url: 'https://v0-next-js-contact-sharing.vercel.app',
+    url: 'https://sharemycontact.com',
     siteName: 'ShareMyContact',
   },
   robots: {

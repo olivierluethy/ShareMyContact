@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next"
 import { blogPosts } from "@/lib/blog-data"
 
-const SITE_URL = "https://v0-next-js-contact-sharing.vercel.app"
+const SITE_URL = "https://sharemycontact.com"
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const blogEntries = blogPosts.map((post) => ({
