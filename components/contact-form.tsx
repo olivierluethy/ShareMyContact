@@ -1,5 +1,4 @@
 "use client"
-
 import { useState, useEffect } from "react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -12,7 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { QRDisplay } from "@/components/qr-display"
-import { User, Phone, Mail, Building2, Globe, Linkedin, Trash2 } from "lucide-react"
+import { User, Phone, Mail, Building2, Globe, Linkedin, Trash2, Pencil } from "lucide-react"
 import { trackEvent } from "@/lib/gtag"
 
 const STORAGE_KEY = "sharemycontact_data"
@@ -59,6 +58,7 @@ export function ContactForm() {
   const [generatedUrl, setGeneratedUrl] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [hydrated, setHydrated] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
 
   // Restore saved data on mount
   useEffect(() => {
@@ -77,7 +77,7 @@ export function ContactForm() {
     }
   }, [formData, hydrated])
 
-  // Persist generated URL whenever it changes (after hydration)
+  // Persist generated URL
   useEffect(() => {
     if (!hydrated) return
     if (generatedUrl) {
@@ -92,24 +92,35 @@ export function ContactForm() {
     setError(null)
   }
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
+  function generateUrl() {
     if (!formData.name.trim()) {
       setError("Full name is required.")
-      return
+      return false
     }
-
-    // Filter out empty fields
     const filtered = Object.fromEntries(
       Object.entries(formData).filter(([, v]) => v.trim() !== "")
     )
-
     const encoded = btoa(JSON.stringify(filtered))
     const origin = typeof window !== "undefined" ? window.location.origin : ""
-    setGeneratedUrl(`${origin}/c/${encoded}`)
+    const newUrl = `${origin}/c/${encoded}`
+    setGeneratedUrl(newUrl)
 
     const filledFields = Object.keys(filtered).join(",")
     trackEvent("generate_card", "contact_form", filledFields, Object.keys(filtered).length)
+    return true
+  }
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    const success = generateUrl()
+    if (success) {
+      setIsEditing(false) // exit edit mode after successful generation
+    }
+  }
+
+  function handleStartEditing() {
+    trackEvent("click", "qr_display", "edit_information")
+    setIsEditing(true)
   }
 
   function handleReset() {
@@ -117,6 +128,7 @@ export function ContactForm() {
     setFormData(initialData)
     setGeneratedUrl(null)
     setError(null)
+    setIsEditing(false)
   }
 
   function handleClearAll() {
@@ -126,12 +138,20 @@ export function ContactForm() {
     setFormData(initialData)
     setGeneratedUrl(null)
     setError(null)
+    setIsEditing(false)
   }
 
-  if (generatedUrl) {
+  // ── RENDERING LOGIC ───────────────────────────────────────────────
+
+  if (generatedUrl && !isEditing) {
     return (
       <div className="flex flex-col items-center gap-4">
-        <QRDisplay url={generatedUrl} name={formData.name} onReset={handleReset} />
+        <QRDisplay
+          url={generatedUrl}
+          name={formData.name}
+          onReset={handleReset}
+          onEdit={handleStartEditing}
+        />
         <Button
           variant="destructive"
           onClick={handleClearAll}
@@ -201,10 +221,12 @@ export function ContactForm() {
     <Card className="mx-auto w-full max-w-lg border-border shadow-lg">
       <CardHeader className="text-center">
         <CardTitle className="text-2xl font-semibold text-foreground">
-          Create Your Card
+          {isEditing ? "Edit Your Card" : "Create Your Card"}
         </CardTitle>
         <CardDescription className="text-muted-foreground">
-          Fill in your details below. Only your name is required.
+          {isEditing
+            ? "Update your details. The QR code will only change when you save."
+            : "Fill in your details below. Only your name is required."}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -214,9 +236,7 @@ export function ContactForm() {
               <Label htmlFor={field.key} className="flex items-center gap-2 text-foreground">
                 <span className="text-muted-foreground">{field.icon}</span>
                 {field.label}
-                {field.required && (
-                  <span className="text-destructive">*</span>
-                )}
+                {field.required && <span className="text-destructive">*</span>}
               </Label>
               <Input
                 id={field.key}
@@ -236,7 +256,7 @@ export function ContactForm() {
           )}
 
           <Button type="submit" size="lg" className="mt-2 w-full">
-            Generate QR Code & Link
+            {isEditing ? "Save Changes" : "Generate QR Code & Link"}
           </Button>
 
           {hydrated && Object.values(formData).some((v) => v.trim() !== "") && (
