@@ -1,6 +1,8 @@
 import { Hero } from "@/components/hero"
 import { ContactForm } from "@/components/contact-form"
 import { BlogTeaser } from "@/components/blog-teaser"
+import { BespokeServices } from '@/components/BespokeServices'
+import { TrustBadges } from "@/components/TrustBadges"
 
 export default function Home() {
   return (
@@ -10,7 +12,8 @@ export default function Home() {
         <ContactForm />
       </section>
       <div className="border-t border-border">
-        <BlogTeaser />
+          <TrustBadges />
+        <BespokeServices />
       </div>
     </>
   )

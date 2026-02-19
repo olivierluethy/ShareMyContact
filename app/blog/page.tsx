@@ -43,13 +43,36 @@ export default function BlogPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-16 md:py-24">
-      <header className="mb-12">
-        <h1 className="text-3xl font-bold tracking-tight text-foreground md:text-4xl">
-          Blog
-        </h1>
-        <p className="mt-3 text-muted-foreground leading-relaxed">
-          Insights on privacy, digital business cards, and modern networking.
-        </p>
+     <header className="relative mb-12 pb-8 border-b border-white/5">
+        <div className="absolute -left-12 -top-12 h-32 w-32 rounded-full bg-indigo-500/10 blur-[80px] pointer-events-none" />
+        
+        <div className="relative z-10 space-y-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-indigo-500/20 bg-indigo-500/10 text-[10px] font-bold uppercase tracking-widest text-indigo-400">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+            </span>
+            Engineering Logs
+          </div>
+
+          <div>
+            {/* "block" entfernt und whitespace-nowrap hinzugefügt für eine Zeile */}
+            <h1 className="text-3xl md:text-5xl font-extrabold tracking-tighter italic whitespace-nowrap">
+              <span className="bg-gradient-to-r from-white via-indigo-200 to-purple-400 bg-clip-text text-transparent">
+                Share My Contact
+              </span>
+              <span className="text-white ml-2">Insights</span>
+            </h1>
+            
+            <p className="mt-4 max-w-2xl text-base md:text-lg text-muted-foreground leading-relaxed">
+              Reflective key learnings and architectural improvements. 
+              Exploring the intersection of <span className="text-indigo-400 font-medium">privacy-first engineering</span> and 
+              high-performance networking.
+            </p>
+          </div>
+
+          <div className="mt-6 h-1 w-20 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full" />
+        </div>
       </header>
 
       <div className="flex flex-col gap-6">
