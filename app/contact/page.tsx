@@ -25,20 +25,31 @@ export default function ContactPage() {
 
     const formData = new FormData(e.currentTarget)
 
+    const endpoint =
+      process.env.NEXT_PUBLIC_CONTACT_ENDPOINT ||
+      "https://sharemycontact.com/contact.php"
+
     try {
-      // ACHTUNG: Ersetze dies durch deine echte PHP-URL (z.B. https://api.deineseite.ch)
-      const response = await fetch("https://sharemycontact.com/contact.php", {
+      const response = await fetch(endpoint, {
         method: "POST",
-        body: formData, // Schickt die Daten als klassischen POST-Request
+        body: formData,
       })
 
-      const result = await response.json()
+      let result: { success?: boolean; message?: string } = {}
+      try {
+        result = await response.json()
+      } catch {
+        // server returned non-JSON (e.g. HTML error page)
+      }
 
-      if (result.success) {
+      if (response.ok && result.success) {
         setStatus('success')
       } else {
         setStatus('error')
-        setErrorMessage(result.message || "Something went wrong.")
+        setErrorMessage(
+          result.message ||
+            `Something went wrong (HTTP ${response.status}). Please try again later.`
+        )
       }
     } catch (error) {
       setStatus('error')
@@ -112,7 +123,7 @@ export default function ContactPage() {
                 <label className="text-sm font-medium text-gray-400 flex items-center gap-2">
                   <MessageSquare className="w-3.5 h-3.5 text-pink-400" /> Message
                 </label>
-                <textarea 
+                <textarea
                   name="message"
                   required
                   rows={5}
@@ -120,6 +131,16 @@ export default function ContactPage() {
                   className="w-full bg-gray-900/50 border border-gray-800 rounded-xl px-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all resize-none"
                 />
               </div>
+
+              {/* Honeypot — hidden from real users; bots fill it and get rejected. */}
+              <input
+                type="text"
+                name="website"
+                tabIndex={-1}
+                autoComplete="off"
+                aria-hidden="true"
+                className="hidden"
+              />
 
               <button 
                 disabled={status === 'loading'}

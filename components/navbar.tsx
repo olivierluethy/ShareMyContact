@@ -25,11 +25,11 @@ export function Navbar() {
         <Link href="/" onClick={() => trackEvent("click", "navigation", "logo_home")} className="flex items-center gap-2 transition-opacity hover:opacity-80">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
             <div className="relative h-8 w-8 overflow-hidden rounded-lg">
-  <Image 
+  <Image
     src="/favicon.svg"
-    alt="Teilen"
+    alt="ShareMyContact logo"
     fill
-    className="object-cover" // Füllt das Quadrat komplett aus
+    className="object-cover"
   />
 </div>
 

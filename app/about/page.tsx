@@ -32,13 +32,13 @@ export default function AboutPage() {
           <div className="relative group">
             <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
             <div className="relative w-48 h-48 md:w-64 md:h-64 rounded-2xl overflow-hidden bg-gray-900 border border-white/10">
-              <Image 
-  src="https://api.dicebear.com/9.x/pixel-art/svg?seed=puppy" 
-  alt="Olivier Lüthy"
-  fill
-  className="object-cover transition-transform duration-500 group-hover:scale-105"
-  unoptimized // Wichtig für SVGs, da Next.js SVGs nicht serverseitig in WebP umwandelt
-/>
+              <Image
+                src="https://api.dicebear.com/9.x/pixel-art/svg?seed=puppy"
+                alt="Olivier Lüthy"
+                fill
+                className="object-cover transition-transform duration-500 group-hover:scale-105"
+                unoptimized
+              />
 
             </div>
           </div>

@@ -43,9 +43,9 @@ export default function TermsPage() {
               <h2 className="text-2xl font-bold">2. Usage & Security Architecture</h2>
             </div>
             <p className="leading-relaxed">
-              Our service is engineered to share contact data efficiently. We guarantee a 
-              <span className="text-white font-semibold"> Zero-Knowledge Architecture</span>: 
-              Your data is encrypted locally within your link and never touches our databases. 
+              Our service is engineered to share contact data efficiently. We guarantee a
+              <span className="text-white font-semibold"> Zero-Knowledge Architecture</span>:
+              your contact data is encoded directly into the link you share and never touches our databases.
               You are solely responsible for the accuracy of the data you share.
             </p>
           </section>

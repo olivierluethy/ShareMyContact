@@ -11,11 +11,16 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { QRDisplay } from "@/components/qr-display"
-import { User, Phone, Mail, Building2, Globe, Linkedin, Trash2, Pencil } from "lucide-react"
+import { User, Phone, Mail, Building2, Globe, Linkedin, Trash2 } from "lucide-react"
 import { trackEvent } from "@/lib/gtag"
+import { encodePayload } from "@/lib/encoding"
 
 const STORAGE_KEY = "sharemycontact_data"
 const STORAGE_URL_KEY = "sharemycontact_url"
+const STORAGE_TS_KEY = "sharemycontact_ts"
+// Locally-stored draft expires after 30 days. The URL itself never expires
+// — it carries its own data — but the convenience cache in localStorage does.
+const STORAGE_TTL_MS = 30 * 24 * 60 * 60 * 1000
 
 interface ContactData {
   name: string
@@ -38,6 +43,14 @@ const initialData: ContactData = {
 function loadSavedData(): { formData: ContactData; url: string | null } {
   if (typeof window === "undefined") return { formData: initialData, url: null }
   try {
+    const ts = Number(localStorage.getItem(STORAGE_TS_KEY) ?? "0")
+    if (ts && Date.now() - ts > STORAGE_TTL_MS) {
+      localStorage.removeItem(STORAGE_KEY)
+      localStorage.removeItem(STORAGE_URL_KEY)
+      localStorage.removeItem(STORAGE_TS_KEY)
+      return { formData: initialData, url: null }
+    }
+
     const saved = localStorage.getItem(STORAGE_KEY)
     const savedUrl = localStorage.getItem(STORAGE_URL_KEY)
     if (saved) {
@@ -60,7 +73,6 @@ export function ContactForm() {
   const [hydrated, setHydrated] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
 
-  // Restore saved data on mount
   useEffect(() => {
     const { formData: saved, url } = loadSavedData()
     setFormData(saved)
@@ -68,22 +80,30 @@ export function ContactForm() {
     setHydrated(true)
   }, [])
 
-  // Persist form data whenever it changes (after hydration)
   useEffect(() => {
     if (!hydrated) return
     const hasData = Object.values(formData).some((v) => v.trim() !== "")
     if (hasData) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(formData))
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(formData))
+        localStorage.setItem(STORAGE_TS_KEY, String(Date.now()))
+      } catch {
+        // quota exceeded or storage disabled — silently skip the cache
+      }
     }
   }, [formData, hydrated])
 
-  // Persist generated URL
   useEffect(() => {
     if (!hydrated) return
-    if (generatedUrl) {
-      localStorage.setItem(STORAGE_URL_KEY, generatedUrl)
-    } else {
-      localStorage.removeItem(STORAGE_URL_KEY)
+    try {
+      if (generatedUrl) {
+        localStorage.setItem(STORAGE_URL_KEY, generatedUrl)
+        localStorage.setItem(STORAGE_TS_KEY, String(Date.now()))
+      } else {
+        localStorage.removeItem(STORAGE_URL_KEY)
+      }
+    } catch {
+      // ignore
     }
   }, [generatedUrl, hydrated])
 
@@ -92,15 +112,25 @@ export function ContactForm() {
     setError(null)
   }
 
-  function generateUrl() {
+  function generateUrl(): boolean {
     if (!formData.name.trim()) {
       setError("Full name is required.")
       return false
     }
+
     const filtered = Object.fromEntries(
       Object.entries(formData).filter(([, v]) => v.trim() !== "")
     )
-    const encoded = btoa(JSON.stringify(filtered))
+
+    let encoded: string
+    try {
+      encoded = encodePayload(filtered)
+    } catch (err) {
+      setError("Could not encode contact data. Please remove unusual characters and try again.")
+      trackEvent("error", "contact_form", "encode_failed")
+      return false
+    }
+
     const origin = typeof window !== "undefined" ? window.location.origin : ""
     const newUrl = `${origin}/c/${encoded}`
     setGeneratedUrl(newUrl)
@@ -113,9 +143,7 @@ export function ContactForm() {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     const success = generateUrl()
-    if (success) {
-      setIsEditing(false) // exit edit mode after successful generation
-    }
+    if (success) setIsEditing(false)
   }
 
   function handleStartEditing() {
@@ -133,15 +161,18 @@ export function ContactForm() {
 
   function handleClearAll() {
     trackEvent("click", "contact_form", "clear_all_data")
-    localStorage.removeItem(STORAGE_KEY)
-    localStorage.removeItem(STORAGE_URL_KEY)
+    try {
+      localStorage.removeItem(STORAGE_KEY)
+      localStorage.removeItem(STORAGE_URL_KEY)
+      localStorage.removeItem(STORAGE_TS_KEY)
+    } catch {
+      // ignore
+    }
     setFormData(initialData)
     setGeneratedUrl(null)
     setError(null)
     setIsEditing(false)
   }
-
-  // ── RENDERING LOGIC ───────────────────────────────────────────────
 
   if (generatedUrl && !isEditing) {
     return (
@@ -258,6 +289,10 @@ export function ContactForm() {
           <Button type="submit" size="lg" className="mt-2 w-full">
             {isEditing ? "Save Changes" : "Generate QR Code & Link"}
           </Button>
+
+          <p className="text-xs text-muted-foreground text-center">
+            Your details live in the link you share — never on our servers.
+          </p>
 
           {hydrated && Object.values(formData).some((v) => v.trim() !== "") && (
             <Button

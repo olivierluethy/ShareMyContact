@@ -16,10 +16,10 @@ export function TrustBadges() {
               </svg>
             </div>
             <h3 className="text-xl md:text-2xl font-semibold text-white mb-2">
-              Secure
+              Private
             </h3>
             <p className="text-gray-400 text-sm md:text-base leading-relaxed max-w-xs">
-              End-to-end encryption and zero-knowledge architecture — your contacts stay private.
+              Zero-knowledge by design — your contact data lives in the link itself, never on our servers.
             </p>
           </div>
 

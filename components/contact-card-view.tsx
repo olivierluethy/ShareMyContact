@@ -20,6 +20,8 @@ import {
   Share2,
 } from "lucide-react"
 import { trackEvent } from "@/lib/gtag"
+import { decodePayload } from "@/lib/encoding"
+import { buildVCard, vCardFilename } from "@/lib/vcard"
 
 interface ContactData {
   name?: string
@@ -35,10 +37,12 @@ export function ContactCardView() {
   const [shareStatus, setShareStatus] = useState<string | null>(null)
 
   const data = useMemo<ContactData | null>(() => {
+    const raw = params.data
+    if (typeof raw !== "string" || raw.length === 0) return null
     try {
-      const raw = atob(params.data as string)
-      return JSON.parse(raw)
+      return decodePayload<ContactData>(raw)
     } catch {
+      trackEvent("error", "contact_card", "decode_failed")
       return null
     }
   }, [params.data])
@@ -61,35 +65,40 @@ export function ContactCardView() {
   }
 
   function generateVCard() {
-    if (!data) return
+    if (!data?.name) return
     trackEvent("click", "contact_card", "save_contact_vcard", 1)
-    const lines = [
-      "BEGIN:VCARD",
-      "VERSION:3.0",
-      `FN:${data.name}`,
-      data.phone ? `TEL:${data.phone}` : "",
-      data.email ? `EMAIL:${data.email}` : "",
-      data.company ? `ORG:${data.company}` : "",
-      data.website ? `URL:${data.website}` : "",
-      data.linkedin ? `URL:${data.linkedin}` : "",
-      "END:VCARD",
-    ]
-      .filter(Boolean)
-      .join("\n")
 
-    const blob = new Blob([lines], { type: "text/vcard" })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement("a")
-    a.href = url
-    a.download = `${data.name?.replace(/\s+/g, "_")}.vcf`
-    a.click()
-    URL.revokeObjectURL(url)
+    try {
+      const vcard = buildVCard({
+        name: data.name,
+        phone: data.phone,
+        email: data.email,
+        company: data.company,
+        website: data.website,
+        linkedin: data.linkedin,
+      })
+
+      const blob = new Blob([vcard], { type: "text/vcard;charset=utf-8" })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = vCardFilename(data.name)
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      // Defer revoke so Safari/iOS can finish the download.
+      setTimeout(() => URL.revokeObjectURL(url), 1000)
+    } catch {
+      trackEvent("error", "contact_card", "vcard_generation_failed")
+      setShareStatus("Could not save contact")
+      setTimeout(() => setShareStatus(null), 2000)
+    }
   }
 
   async function handleShare() {
     if (!data) return
     trackEvent("click", "contact_card", "share_contact")
-    if (navigator.share) {
+    if (typeof navigator !== "undefined" && navigator.share) {
       try {
         await navigator.share({
           title: `${data.name}'s Contact`,
@@ -100,16 +109,20 @@ export function ContactCardView() {
         trackEvent("share", "contact_card", "native_share_cancelled")
       }
     } else {
-      await navigator.clipboard.writeText(window.location.href)
-      trackEvent("share", "contact_card", "link_copied_fallback")
-      setShareStatus("Link copied!")
+      try {
+        await navigator.clipboard.writeText(window.location.href)
+        trackEvent("share", "contact_card", "link_copied_fallback")
+        setShareStatus("Link copied!")
+      } catch {
+        setShareStatus("Could not copy link")
+      }
       setTimeout(() => setShareStatus(null), 2000)
     }
   }
 
   const fields = [
-    { icon: <Phone className="h-4 w-4" />, label: "Phone", value: data.phone, href: `tel:${data.phone}` },
-    { icon: <Mail className="h-4 w-4" />, label: "Email", value: data.email, href: `mailto:${data.email}` },
+    { icon: <Phone className="h-4 w-4" />, label: "Phone", value: data.phone, href: data.phone ? `tel:${data.phone}` : undefined },
+    { icon: <Mail className="h-4 w-4" />, label: "Email", value: data.email, href: data.email ? `mailto:${data.email}` : undefined },
     { icon: <Building2 className="h-4 w-4" />, label: "Company", value: data.company },
     { icon: <Globe className="h-4 w-4" />, label: "Website", value: data.website, href: data.website },
     { icon: <Linkedin className="h-4 w-4" />, label: "LinkedIn", value: data.linkedin, href: data.linkedin },

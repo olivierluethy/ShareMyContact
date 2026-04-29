@@ -10,8 +10,8 @@ export function Hero() {
       </Badge>
 
       <h1 className="max-w-3xl text-balance text-4xl font-bold leading-tight tracking-tight text-foreground md:text-5xl lg:text-6xl">
-        {"The world's simplest way for "}
-        <span className="text-primary">contact sharing</span>
+        {"The world's simplest way to "}
+        <span className="text-primary">share your contacts</span>
       </h1>
 
       <p className="mt-5 max-w-xl text-pretty text-base leading-relaxed text-muted-foreground md:text-lg">
