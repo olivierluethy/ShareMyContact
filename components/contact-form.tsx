@@ -1,5 +1,5 @@
 "use client"
-import { useState, useEffect } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
@@ -12,7 +12,16 @@ import {
 } from "@/components/ui/card"
 import { QRDisplay } from "@/components/qr-display"
 import { User, Phone, Mail, Building2, Globe, Linkedin, Trash2 } from "lucide-react"
-import { trackEvent } from "@/lib/gtag"
+import {
+  trackEvent,
+  trackFieldBlur,
+  trackFieldComplete,
+  trackFieldFocus,
+  trackFormAbandon,
+  trackFormError,
+  trackFormStart,
+  trackFormSubmit,
+} from "@/lib/gtag"
 import { encodePayload } from "@/lib/encoding"
 
 const STORAGE_KEY = "sharemycontact_data"
@@ -21,6 +30,7 @@ const STORAGE_TS_KEY = "sharemycontact_ts"
 // Locally-stored draft expires after 30 days. The URL itself never expires
 // — it carries its own data — but the convenience cache in localStorage does.
 const STORAGE_TTL_MS = 30 * 24 * 60 * 60 * 1000
+const FORM_NAME = "contact_form"
 
 interface ContactData {
   name: string
@@ -73,6 +83,15 @@ export function ContactForm() {
   const [hydrated, setHydrated] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
 
+  // Tracking state — refs so updates don't trigger re-renders.
+  const formStartedAtRef = useRef<number | null>(null)
+  const formStartFiredRef = useRef(false)
+  const fieldFocusAtRef = useRef<Record<string, number>>({})
+  const fieldInitialValueRef = useRef<Record<string, string>>({})
+  const fieldCompletedRef = useRef<Set<string>>(new Set())
+  const lastFieldRef = useRef<string>("")
+  const submittedRef = useRef(false)
+
   useEffect(() => {
     const { formData: saved, url } = loadSavedData()
     setFormData(saved)
@@ -107,6 +126,67 @@ export function ContactForm() {
     }
   }, [generatedUrl, hydrated])
 
+  // Form abandonment: if user typed something but didn't submit and the
+  // tab is closing or the component unmounts, emit form_abandon.
+  useEffect(() => {
+    function maybeAbandon() {
+      if (submittedRef.current) return
+      if (formStartedAtRef.current == null) return
+      const filled = Object.entries(formData).filter(([, v]) => v.trim() !== "")
+      if (filled.length === 0) return
+      trackFormAbandon({
+        form: FORM_NAME,
+        last_field: lastFieldRef.current || "unknown",
+        duration_ms: Math.round(performance.now() - formStartedAtRef.current),
+        filled_count: filled.length,
+        filled_fields: filled.map(([k]) => k).join(","),
+      })
+    }
+    window.addEventListener("pagehide", maybeAbandon)
+    return () => {
+      window.removeEventListener("pagehide", maybeAbandon)
+      maybeAbandon()
+    }
+  }, [formData])
+
+  function ensureFormStarted(field: string) {
+    if (formStartFiredRef.current) return
+    formStartFiredRef.current = true
+    formStartedAtRef.current = performance.now()
+    trackFormStart(FORM_NAME, field)
+  }
+
+  function handleFocus(field: keyof ContactData) {
+    ensureFormStarted(field)
+    fieldFocusAtRef.current[field] = performance.now()
+    fieldInitialValueRef.current[field] = formData[field]
+    lastFieldRef.current = field
+    trackFieldFocus(FORM_NAME, field)
+  }
+
+  function handleBlur(field: keyof ContactData) {
+    const focusedAt = fieldFocusAtRef.current[field]
+    if (focusedAt == null) return
+    delete fieldFocusAtRef.current[field]
+    const value = formData[field]
+    const initial = fieldInitialValueRef.current[field] ?? ""
+    const duration_ms = Math.round(performance.now() - focusedAt)
+    const filled = value.trim() !== ""
+    const changed = value !== initial
+    trackFieldBlur({
+      form: FORM_NAME,
+      field,
+      filled,
+      duration_ms,
+      char_count: value.length,
+      changed,
+    })
+    if (filled && !fieldCompletedRef.current.has(field)) {
+      fieldCompletedRef.current.add(field)
+      trackFieldComplete(FORM_NAME, field, value.length)
+    }
+  }
+
   function handleChange(field: keyof ContactData, value: string) {
     setFormData((prev) => ({ ...prev, [field]: value }))
     setError(null)
@@ -115,19 +195,20 @@ export function ContactForm() {
   function generateUrl(): boolean {
     if (!formData.name.trim()) {
       setError("Full name is required.")
+      trackFormError(FORM_NAME, "name_required")
       return false
     }
 
     const filtered = Object.fromEntries(
-      Object.entries(formData).filter(([, v]) => v.trim() !== "")
+      Object.entries(formData).filter(([, v]) => v.trim() !== ""),
     )
 
     let encoded: string
     try {
       encoded = encodePayload(filtered)
-    } catch (err) {
+    } catch {
       setError("Could not encode contact data. Please remove unusual characters and try again.")
-      trackEvent("error", "contact_form", "encode_failed")
+      trackFormError(FORM_NAME, "encode_failed")
       return false
     }
 
@@ -136,7 +217,19 @@ export function ContactForm() {
     setGeneratedUrl(newUrl)
 
     const filledFields = Object.keys(filtered).join(",")
-    trackEvent("generate_card", "contact_form", filledFields, Object.keys(filtered).length)
+    const duration_ms =
+      formStartedAtRef.current != null
+        ? Math.round(performance.now() - formStartedAtRef.current)
+        : 0
+    trackFormSubmit({
+      form: FORM_NAME,
+      filled_fields: filledFields,
+      filled_count: Object.keys(filtered).length,
+      duration_ms,
+    })
+    // Keep the legacy event so existing GA dashboards keep working.
+    trackEvent("generate_card", FORM_NAME, filledFields, Object.keys(filtered).length)
+    submittedRef.current = true
     return true
   }
 
@@ -148,19 +241,27 @@ export function ContactForm() {
 
   function handleStartEditing() {
     trackEvent("click", "qr_display", "edit_information")
+    submittedRef.current = false
+    formStartFiredRef.current = false
+    formStartedAtRef.current = null
+    fieldCompletedRef.current = new Set()
     setIsEditing(true)
   }
 
   function handleReset() {
-    trackEvent("click", "contact_form", "reset_form")
+    trackEvent("click", FORM_NAME, "reset_form")
     setFormData(initialData)
     setGeneratedUrl(null)
     setError(null)
     setIsEditing(false)
+    submittedRef.current = false
+    formStartFiredRef.current = false
+    formStartedAtRef.current = null
+    fieldCompletedRef.current = new Set()
   }
 
   function handleClearAll() {
-    trackEvent("click", "contact_form", "clear_all_data")
+    trackEvent("click", FORM_NAME, "clear_all_data")
     try {
       localStorage.removeItem(STORAGE_KEY)
       localStorage.removeItem(STORAGE_URL_KEY)
@@ -172,6 +273,10 @@ export function ContactForm() {
     setGeneratedUrl(null)
     setError(null)
     setIsEditing(false)
+    submittedRef.current = false
+    formStartFiredRef.current = false
+    formStartedAtRef.current = null
+    fieldCompletedRef.current = new Set()
   }
 
   if (generatedUrl && !isEditing) {
@@ -275,6 +380,8 @@ export function ContactForm() {
                 placeholder={field.placeholder}
                 value={formData[field.key]}
                 onChange={(e) => handleChange(field.key, e.target.value)}
+                onFocus={() => handleFocus(field.key)}
+                onBlur={() => handleBlur(field.key)}
                 required={field.required}
               />
             </div>
