@@ -13,7 +13,7 @@ export default function Home() {
         <Hero />
       </TrackedSection>
       <TrackedSection name="contact_form" threshold={0.25}>
-        <section id="create" className="mx-auto max-w-5xl px-6 pb-16 md:pb-24">
+        <section id="create" className="mx-auto max-w-5xl px-4 pb-12 sm:px-6 sm:pb-16 md:pb-24">
           <ContactForm />
         </section>
       </TrackedSection>

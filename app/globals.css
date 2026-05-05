@@ -119,7 +119,20 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
   body {
     @apply bg-background text-foreground;
+    overflow-x: hidden;
+  }
+  /* Prevent any element with a fixed width from breaking the viewport on small phones. */
+  img,
+  svg,
+  video,
+  canvas,
+  iframe {
+    max-width: 100%;
   }
 }

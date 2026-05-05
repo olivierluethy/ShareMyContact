@@ -21,20 +21,17 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
-      <nav className="mx-auto flex h-16 max-w-5xl items-center justify-between px-6">
+      <nav className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4 sm:h-16 sm:px-6">
         <Link href="/" onClick={() => trackEvent("click", "navigation", "logo_home")} className="flex items-center gap-2 transition-opacity hover:opacity-80">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-            <div className="relative h-8 w-8 overflow-hidden rounded-lg">
-  <Image
-    src="/favicon.svg"
-    alt="ShareMyContact logo"
-    fill
-    className="object-cover"
-  />
-</div>
-
+          <div className="relative h-8 w-8 overflow-hidden rounded-lg bg-primary">
+            <Image
+              src="/favicon.svg"
+              alt="ShareMyContact logo"
+              fill
+              className="object-cover"
+            />
           </div>
-          <span className="text-lg font-semibold tracking-tight text-foreground">
+          <span className="text-base font-semibold tracking-tight text-foreground sm:text-lg">
             ShareMyContact
           </span>
         </Link>
@@ -72,7 +69,7 @@ export function Navbar() {
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="border-t border-border bg-background px-6 pb-4 pt-2 md:hidden">
+        <div className="border-t border-border bg-background px-4 pb-4 pt-2 sm:px-6 md:hidden">
           {navLinks.map((link) => (
             <Link
               key={link.href}

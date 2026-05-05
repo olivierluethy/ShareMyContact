@@ -128,21 +128,21 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   }
 
   return (
-    <article className="mx-auto max-w-3xl px-5 py-16 md:py-24 lg:px-8">
+    <article className="mx-auto max-w-3xl px-4 py-10 sm:px-5 sm:py-16 md:py-24 lg:px-8">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
       <TrackedLink href="/blog" eventCategory="blog_post" eventLabel={`back_to_blog_top_${slug}`}>
-        <Button variant="ghost" className="mb-10 gap-2 text-muted-foreground -ml-3">
+        <Button variant="ghost" className="mb-6 gap-2 text-muted-foreground -ml-3 sm:mb-10">
           <ArrowLeft className="h-4 w-4" />
           Back to Blog
         </Button>
       </TrackedLink>
 
-      <header className="mb-12">
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-muted-foreground">
+      <header className="mb-8 sm:mb-12">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted-foreground sm:gap-x-5 sm:text-sm">
           <div className="flex items-center gap-1.5">
             <Calendar className="h-4 w-4" />
             <time dateTime={post.date}>{displayDate}</time>
@@ -153,20 +153,20 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           </div>
         </div>
 
-        <h1 className="mt-6 text-3xl font-bold tracking-tight text-foreground md:text-4xl lg:text-5xl">
+        <h1 className="mt-4 text-2xl font-bold tracking-tight text-foreground leading-tight sm:mt-6 sm:text-3xl md:text-4xl lg:text-5xl">
           {post.title}
         </h1>
 
-        <p className="mt-5 text-xl leading-relaxed text-muted-foreground">
+        <p className="mt-3 text-base leading-relaxed text-muted-foreground sm:mt-5 sm:text-xl">
           {post.excerpt}
         </p>
       </header>
 
-      <div className="prose prose-neutral max-w-none dark:prose-invert prose-headings:font-semibold prose-a:text-primary prose-a:no-underline hover:prose-a:underline">
+      <div className="prose prose-sm prose-neutral max-w-none dark:prose-invert prose-headings:font-semibold prose-a:text-primary prose-a:no-underline hover:prose-a:underline sm:prose-base prose-pre:overflow-x-auto prose-img:rounded-lg break-words">
         {contentBlocks}
       </div>
 
-      <div className="mt-16 border-t border-border pt-10">
+      <div className="mt-10 border-t border-border pt-6 sm:mt-16 sm:pt-10">
         <TrackedLink href="/blog" eventCategory="blog_post" eventLabel={`all_posts_bottom_${slug}`}>
           <Button variant="outline" className="gap-2">
             <ArrowLeft className="h-4 w-4" />

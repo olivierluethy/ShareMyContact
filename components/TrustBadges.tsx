@@ -23,12 +23,12 @@ function TrustBadge({
 
   return (
     <div ref={ref} className="flex flex-col items-center text-center group" data-track-id={`trust_badge:${name}`}>
-      <div className={`mb-4 p-4 rounded-xl transition-all duration-300 ${iconWrapClass}`}>
-        <svg className={`w-10 h-10 md:w-14 md:h-14 ${iconClass}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
+      <div className={`mb-3 p-3 rounded-xl transition-all duration-300 sm:mb-4 sm:p-4 ${iconWrapClass}`}>
+        <svg className={`w-8 h-8 sm:w-10 sm:h-10 md:w-14 md:h-14 ${iconClass}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.8">
           {children}
         </svg>
       </div>
-      <h3 className="text-xl md:text-2xl font-semibold text-white mb-2">{title}</h3>
+      <h3 className="text-lg sm:text-xl md:text-2xl font-semibold text-white mb-1.5 sm:mb-2">{title}</h3>
       <p className="text-gray-400 text-sm md:text-base leading-relaxed max-w-xs">{description}</p>
     </div>
   )
@@ -37,8 +37,8 @@ function TrustBadge({
 export function TrustBadges() {
   return (
     <section className="bg-gray-950 py-10 md:py-16 border-t border-gray-800/50">
-      <div className="max-w-6xl mx-auto px-5 sm:px-8 lg:px-10">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10">
+      <div className="max-w-6xl mx-auto px-4 sm:px-8 lg:px-10">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 md:gap-10">
           <TrustBadge
             name="private"
             title="Private"

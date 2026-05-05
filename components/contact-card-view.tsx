@@ -49,13 +49,13 @@ export function ContactCardView() {
 
   if (!data || !data.name) {
     return (
-      <div className="flex min-h-[50vh] items-center justify-center px-6">
+      <div className="flex min-h-[50vh] items-center justify-center px-4 sm:px-6">
         <Card className="max-w-md text-center">
-          <CardHeader>
+          <CardHeader className="px-4 sm:px-6">
             <CardTitle className="text-foreground">Invalid Contact Card</CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground">
+          <CardContent className="px-4 sm:px-6">
+            <p className="text-muted-foreground text-sm">
               This link does not contain valid contact information. Please check the URL and try again.
             </p>
           </CardContent>
@@ -129,20 +129,20 @@ export function ContactCardView() {
   ].filter((f) => f.value)
 
   return (
-    <div className="flex min-h-[60vh] items-center justify-center px-6 py-12">
+    <div className="flex min-h-[60vh] items-center justify-center px-4 py-8 sm:px-6 sm:py-12">
       <Card className="w-full max-w-md border-border shadow-lg">
-        <CardHeader className="items-center text-center">
-          <div className="mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-            <User className="h-8 w-8 text-primary" />
+        <CardHeader className="items-center text-center px-4 sm:px-6">
+          <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 sm:h-16 sm:w-16">
+            <User className="h-7 w-7 text-primary sm:h-8 sm:w-8" />
           </div>
-          <CardTitle className="text-2xl text-foreground">{data.name}</CardTitle>
+          <CardTitle className="text-xl text-foreground sm:text-2xl break-words">{data.name}</CardTitle>
           {data.company && (
-            <p className="text-sm text-muted-foreground">{data.company}</p>
+            <p className="text-sm text-muted-foreground break-words">{data.company}</p>
           )}
         </CardHeader>
-        <CardContent className="flex flex-col gap-4">
+        <CardContent className="flex flex-col gap-3 px-4 sm:gap-4 sm:px-6">
           {fields.map((field) => (
-            <div key={field.label} className="flex items-center gap-3">
+            <div key={field.label} className="flex items-center gap-3 min-w-0">
               <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-secondary text-muted-foreground">
                 {field.icon}
               </span>
@@ -154,7 +154,7 @@ export function ContactCardView() {
                     target={field.label === "Phone" || field.label === "Email" ? undefined : "_blank"}
                     rel="noopener noreferrer"
                     onClick={() => trackEvent("click", "contact_card", `field_${field.label.toLowerCase()}`)}
-                    className="truncate text-sm font-medium text-primary hover:underline"
+                    className="block truncate text-sm font-medium text-primary hover:underline"
                   >
                     {field.value}
                   </a>
@@ -167,12 +167,12 @@ export function ContactCardView() {
             </div>
           ))}
 
-          <div className="mt-4 flex gap-3">
-            <Button onClick={generateVCard} className="flex-1 gap-2">
+          <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:gap-3">
+            <Button onClick={generateVCard} className="flex-1 gap-2 h-11">
               <Download className="h-4 w-4" />
               Save Contact
             </Button>
-            <Button variant="outline" onClick={handleShare} className="gap-2">
+            <Button variant="outline" onClick={handleShare} className="gap-2 h-11 sm:flex-initial">
               <Share2 className="h-4 w-4" />
               {shareStatus ?? "Share"}
             </Button>

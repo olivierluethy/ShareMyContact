@@ -23,10 +23,25 @@ interface QRDisplayProps {
 export function QRDisplay({ url, name, onReset, onEdit }: QRDisplayProps) {
   const [copied, setCopied] = useState(false)
   const [showEnlarged, setShowEnlarged] = useState(false)
+  const [qrSize, setQrSize] = useState(220)
 
   const shownAtRef = useRef<number>(performance.now())
   const enlargedAtRef = useRef<number | null>(null)
   const copyCountRef = useRef(0)
+
+  // Pick a QR size that always fits the screen — never overflow on small phones.
+  useEffect(() => {
+    function updateSize() {
+      const w = window.innerWidth
+      // Account for outer page px-4 (32) + card px-4/6 (32-48) + button p-4 (32).
+      // Cap to keep a comfortable scan size on tablets/desktop.
+      const available = Math.min(w - 96, 280)
+      setQrSize(Math.max(180, available))
+    }
+    updateSize()
+    window.addEventListener("resize", updateSize)
+    return () => window.removeEventListener("resize", updateSize)
+  }, [])
 
   useEffect(() => {
     track("qr_view", { name_present: name.trim() !== "" })
@@ -78,16 +93,16 @@ export function QRDisplay({ url, name, onReset, onEdit }: QRDisplayProps) {
 
   return (
     <Card className="mx-auto w-full max-w-lg border-border shadow-lg">
-      <CardHeader className="text-center pb-6">
-        <CardTitle className="text-2xl font-semibold text-foreground">
+      <CardHeader className="text-center pb-4 sm:pb-6 px-4 sm:px-6">
+        <CardTitle className="text-xl font-semibold text-foreground sm:text-2xl">
           Your card is ready!
         </CardTitle>
-        <CardDescription className="text-muted-foreground mt-1.5">
+        <CardDescription className="text-muted-foreground mt-1.5 text-sm">
           Share this QR code or link with {name}'s contact details
         </CardDescription>
       </CardHeader>
 
-      <CardContent className="flex flex-col items-center gap-8">
+      <CardContent className="flex flex-col items-center gap-6 px-4 sm:gap-8 sm:px-6">
         {/* QR Code – clickable to enlarge */}
         <button
           type="button"
@@ -95,12 +110,12 @@ export function QRDisplay({ url, name, onReset, onEdit }: QRDisplayProps) {
             handleEnlargeOpen()
             setShowEnlarged(true)
           }}
-          className="group relative rounded-2xl border border-border bg-card p-6 shadow-sm transition-all hover:shadow-md focus:outline-none focus:ring-2 focus:ring-ring active:scale-[0.98]"
+          className="group relative rounded-2xl border border-border bg-card p-4 shadow-sm transition-all hover:shadow-md focus:outline-none focus:ring-2 focus:ring-ring active:scale-[0.98] sm:p-6"
           aria-label="Tap to enlarge QR code for easier scanning"
         >
           <QRCodeSVG
             value={url}
-            size={typeof window !== "undefined" && window.innerWidth < 640 ? 260 : 220}
+            size={qrSize}
             level="M"
             bgColor="transparent"
             fgColor="currentColor"
@@ -113,17 +128,17 @@ export function QRDisplay({ url, name, onReset, onEdit }: QRDisplayProps) {
           </div>
         </button>
 
-        <p className="text-xs text-muted-foreground text-center -mt-4 sm:hidden">
+        <p className="text-xs text-muted-foreground text-center -mt-2 sm:-mt-4 sm:hidden">
           Tap the QR code to make it larger for easier scanning
         </p>
 
         {/* Shareable Link */}
-        <div className="w-full space-y-2">
+        <div className="w-full space-y-2 min-w-0">
           <p className="text-xs font-medium text-muted-foreground">
             Shareable Link
           </p>
-          <div className="flex items-center gap-2">
-            <code className="flex-1 truncate rounded-md border border-border bg-muted px-3 py-2.5 font-mono text-xs text-foreground">
+          <div className="flex items-center gap-2 min-w-0">
+            <code className="flex-1 min-w-0 truncate rounded-md border border-border bg-muted px-3 py-2.5 font-mono text-[11px] text-foreground sm:text-xs">
               {url}
             </code>
             <Button
@@ -143,7 +158,7 @@ export function QRDisplay({ url, name, onReset, onEdit }: QRDisplayProps) {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex w-full flex-col gap-3 sm:flex-row sm:justify-center sm:gap-4">
+        <div className="flex w-full flex-col gap-2 sm:flex-row sm:justify-center sm:gap-4">
           <Button
             variant="outline"
             onClick={() => {
@@ -151,7 +166,7 @@ export function QRDisplay({ url, name, onReset, onEdit }: QRDisplayProps) {
               track("cta_click", { cta: "edit_information", location: "qr_display" })
               onEdit()
             }}
-            className="gap-2 h-11"
+            className="gap-2 h-11 w-full sm:w-auto"
           >
             <Pencil className="h-4 w-4" />
             Edit Information
@@ -164,7 +179,7 @@ export function QRDisplay({ url, name, onReset, onEdit }: QRDisplayProps) {
               track("cta_click", { cta: "create_new_card", location: "qr_display" })
               onReset()
             }}
-            className="gap-2 text-muted-foreground h-11"
+            className="gap-2 text-muted-foreground h-11 w-full sm:w-auto"
           >
             <RotateCcw className="h-4 w-4" />
             Create a new card
@@ -179,7 +194,7 @@ export function QRDisplay({ url, name, onReset, onEdit }: QRDisplayProps) {
           onClick={() => handleEnlargeClose("backdrop")}
         >
           <div
-            className="relative w-full max-w-md rounded-2xl bg-white p-8 shadow-2xl"
+            className="relative w-full max-w-md rounded-2xl bg-white p-5 shadow-2xl sm:p-8"
             onClick={(e) => e.stopPropagation()}
           >
             <button
@@ -198,10 +213,10 @@ export function QRDisplay({ url, name, onReset, onEdit }: QRDisplayProps) {
               level="M"
               bgColor="#ffffff"
               fgColor="#000000"
-              className="mx-auto rounded-xl shadow-inner"
+              className="mx-auto h-auto w-full max-w-[320px] rounded-xl shadow-inner"
             />
 
-            <p className="mt-6 text-center text-sm text-muted-foreground">
+            <p className="mt-4 text-center text-sm text-gray-500 sm:mt-6">
               Scan with your camera
             </p>
           </div>

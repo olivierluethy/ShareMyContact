@@ -355,20 +355,20 @@ export function ContactForm() {
 
   return (
     <Card className="mx-auto w-full max-w-lg border-border shadow-lg">
-      <CardHeader className="text-center">
-        <CardTitle className="text-2xl font-semibold text-foreground">
+      <CardHeader className="text-center px-4 sm:px-6">
+        <CardTitle className="text-xl font-semibold text-foreground sm:text-2xl">
           {isEditing ? "Edit Your Card" : "Create Your Card"}
         </CardTitle>
-        <CardDescription className="text-muted-foreground">
+        <CardDescription className="text-muted-foreground text-sm">
           {isEditing
             ? "Update your details. The QR code will only change when you save."
             : "Fill in your details below. Only your name is required."}
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+      <CardContent className="px-4 sm:px-6">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4 sm:gap-5">
           {fields.map((field) => (
-            <div key={field.key} className="flex flex-col gap-2">
+            <div key={field.key} className="flex flex-col gap-1.5 sm:gap-2">
               <Label htmlFor={field.key} className="flex items-center gap-2 text-foreground">
                 <span className="text-muted-foreground">{field.icon}</span>
                 {field.label}
@@ -383,6 +383,7 @@ export function ContactForm() {
                 onFocus={() => handleFocus(field.key)}
                 onBlur={() => handleBlur(field.key)}
                 required={field.required}
+                className="h-11 text-base sm:h-9 sm:text-sm"
               />
             </div>
           ))}
