@@ -42,12 +42,14 @@ api-php/
    to it with `Require all denied`.
 4. Run `migrations/001_initial.sql` against your database via PhpMyAdmin.
 5. In the Next.js frontend, set `NEXT_PUBLIC_SMC_API_BASE` to the URL where
-   you uploaded the folder, e.g. `https://sharemycontact.com/api`.
+   you uploaded the folder, e.g. `https://api.sharemycontact.com` (subdomain)
+   or `https://sharemycontact.com/api` (subpath, only if PHP and the frontend
+   share the same host).
 
 ## Smoke tests
 
 ```bash
-BASE="https://sharemycontact.com/api"
+BASE="https://api.sharemycontact.com"
 SID="$(uuidgen)"
 
 # 1) form_started — no field flags

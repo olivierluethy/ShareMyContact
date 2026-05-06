@@ -12,7 +12,7 @@ const FORM_STARTED_KEY = "smc_form_started_logged"
 
 const API_BASE =
   process.env.NEXT_PUBLIC_SMC_API_BASE ||
-  "https://sharemycontact.com/api"
+  "https://api.sharemycontact.com"
 
 export type FormEventType =
   | "form_started"
