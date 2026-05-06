@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 import { QRCodeSVG } from "qrcode.react"
 import {
   Card,
@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Check, Copy, RotateCcw, Pencil } from "lucide-react"
-import { track, trackEvent } from "@/lib/gtag"
+import { trackFormEvent } from "@/lib/smc-tracking"
 
 interface QRDisplayProps {
   url: string
@@ -25,9 +25,14 @@ export function QRDisplay({ url, name, onReset, onEdit }: QRDisplayProps) {
   const [showEnlarged, setShowEnlarged] = useState(false)
   const [qrSize, setQrSize] = useState(220)
 
-  const shownAtRef = useRef<number>(performance.now())
-  const enlargedAtRef = useRef<number | null>(null)
-  const copyCountRef = useRef(0)
+  // qr_generated fires once per render of a successfully-displayed QR.
+  // The form-submit event already fired in contact-form; this lets us
+  // measure the gap (= JS errors / abandons between submit and display).
+  useEffect(() => {
+    void trackFormEvent("qr_generated")
+    // We intentionally do not depend on `url` — re-renders shouldn't re-fire.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // Pick a QR size that always fits the screen — never overflow on small phones.
   useEffect(() => {
@@ -43,39 +48,11 @@ export function QRDisplay({ url, name, onReset, onEdit }: QRDisplayProps) {
     return () => window.removeEventListener("resize", updateSize)
   }, [])
 
-  useEffect(() => {
-    track("qr_view", { name_present: name.trim() !== "" })
-    const shownAt = shownAtRef.current
-    const copyCountSnapshot = copyCountRef
-    return () => {
-      track("qr_dismiss", {
-        dwell_ms: Math.round(performance.now() - shownAt),
-        copy_count: copyCountSnapshot.current,
-      })
-    }
-  }, [name])
-
-  function handleEnlargeOpen() {
-    enlargedAtRef.current = performance.now()
-    track("qr_enlarge_open", {})
-  }
-
-  function handleEnlargeClose(reason: "backdrop" | "close_button" | "escape") {
-    const enteredAt = enlargedAtRef.current
-    enlargedAtRef.current = null
-    const dwell_ms =
-      enteredAt != null ? Math.round(performance.now() - enteredAt) : 0
-    track("qr_enlarge_close", { reason, dwell_ms })
-    setShowEnlarged(false)
-  }
-
   async function handleCopy() {
-    copyCountRef.current += 1
     try {
       await navigator.clipboard.writeText(url)
       setCopied(true)
-      track("copy_link", { method: "clipboard_api", attempt: copyCountRef.current })
-      trackEvent("click", "qr_display", "copy_link")
+      void trackFormEvent("link_copied")
       setTimeout(() => setCopied(false), 2000)
     } catch {
       const textarea = document.createElement("textarea")
@@ -85,8 +62,7 @@ export function QRDisplay({ url, name, onReset, onEdit }: QRDisplayProps) {
       document.execCommand("copy")
       document.body.removeChild(textarea)
       setCopied(true)
-      track("copy_link", { method: "exec_command", attempt: copyCountRef.current })
-      trackEvent("click", "qr_display", "copy_link_fallback")
+      void trackFormEvent("link_copied")
       setTimeout(() => setCopied(false), 2000)
     }
   }
@@ -106,10 +82,7 @@ export function QRDisplay({ url, name, onReset, onEdit }: QRDisplayProps) {
         {/* QR Code – clickable to enlarge */}
         <button
           type="button"
-          onClick={() => {
-            handleEnlargeOpen()
-            setShowEnlarged(true)
-          }}
+          onClick={() => setShowEnlarged(true)}
           className="group relative rounded-2xl border border-border bg-card p-4 shadow-sm transition-all hover:shadow-md focus:outline-none focus:ring-2 focus:ring-ring active:scale-[0.98] sm:p-6"
           aria-label="Tap to enlarge QR code for easier scanning"
         >
@@ -161,11 +134,7 @@ export function QRDisplay({ url, name, onReset, onEdit }: QRDisplayProps) {
         <div className="flex w-full flex-col gap-2 sm:flex-row sm:justify-center sm:gap-4">
           <Button
             variant="outline"
-            onClick={() => {
-              trackEvent("click", "qr_display", "edit_information")
-              track("cta_click", { cta: "edit_information", location: "qr_display" })
-              onEdit()
-            }}
+            onClick={onEdit}
             className="gap-2 h-11 w-full sm:w-auto"
           >
             <Pencil className="h-4 w-4" />
@@ -174,11 +143,7 @@ export function QRDisplay({ url, name, onReset, onEdit }: QRDisplayProps) {
 
           <Button
             variant="ghost"
-            onClick={() => {
-              trackEvent("click", "qr_display", "create_new_card")
-              track("cta_click", { cta: "create_new_card", location: "qr_display" })
-              onReset()
-            }}
+            onClick={onReset}
             className="gap-2 text-muted-foreground h-11 w-full sm:w-auto"
           >
             <RotateCcw className="h-4 w-4" />
@@ -191,7 +156,7 @@ export function QRDisplay({ url, name, onReset, onEdit }: QRDisplayProps) {
       {showEnlarged && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4"
-          onClick={() => handleEnlargeClose("backdrop")}
+          onClick={() => setShowEnlarged(false)}
         >
           <div
             className="relative w-full max-w-md rounded-2xl bg-white p-5 shadow-2xl sm:p-8"
@@ -199,7 +164,7 @@ export function QRDisplay({ url, name, onReset, onEdit }: QRDisplayProps) {
           >
             <button
               className="absolute -right-3 -top-3 rounded-full bg-background p-2 text-foreground shadow-md hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring"
-              onClick={() => handleEnlargeClose("close_button")}
+              onClick={() => setShowEnlarged(false)}
               aria-label="Close enlarged view"
             >
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>

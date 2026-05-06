@@ -1,8 +1,8 @@
-import { ShieldCheck, EyeOff, Database, Lock, Globe } from "lucide-react"
+import { ShieldCheck, EyeOff, Database, Lock, Globe, BarChart3 } from "lucide-react"
 import Link from "next/link"
 
 export default function PrivacyPage() {
-  const lastUpdated = "February 19, 2026"
+  const lastUpdated = "May 6, 2026"
 
   return (
     <main className="min-h-screen bg-gray-950 text-gray-300 py-12 px-4 sm:py-16 sm:px-6 md:py-20">
@@ -69,7 +69,62 @@ export default function PrivacyPage() {
             </div>
             <p className="leading-relaxed text-sm sm:text-base">
               We use lightweight analytics (like Google Analytics with anonymized IPs) to understand how our service is used.
-              This helps us optimize performance and fulfill our mission of providing a fast user experience.
+              Google Analytics is restricted to pageviews and navigation only — it never sees anything from the contact form.
+              See section 4 below for the full breakdown.
+            </p>
+          </section>
+
+          {/* Section 4: What we track (NEW) */}
+          <section className="space-y-3 sm:space-y-4">
+            <div className="flex items-center gap-3 text-white">
+              <BarChart3 className="w-5 h-5 text-emerald-500 shrink-0" />
+              <h2 className="text-xl sm:text-2xl font-bold">4. What we track</h2>
+            </div>
+            <p className="leading-relaxed text-sm sm:text-base">
+              ShareMyContact uses minimal, privacy-respecting analytics on our own servers
+              to understand whether the service is useful. We track:
+            </p>
+            <ul className="list-disc list-outside pl-5 space-y-1.5 text-sm sm:text-base">
+              <li>
+                <span className="font-medium text-white">Anonymous usage events</span> — for example,
+                &ldquo;a form was submitted&rdquo; or &ldquo;a QR code was generated&rdquo;.
+              </li>
+              <li>
+                <span className="font-medium text-white">Which field types were used</span> — for example,
+                &ldquo;phone provided: yes/no&rdquo;. Never the values themselves.
+              </li>
+              <li>
+                <span className="font-medium text-white">Anonymous metadata</span> — device type, referrer,
+                UTM parameters, hashed IP address.
+              </li>
+            </ul>
+
+            <p className="leading-relaxed text-sm sm:text-base mt-4">
+              We do <span className="font-bold text-white">not</span> track, store, or transmit:
+            </p>
+            <ul className="list-disc list-outside pl-5 space-y-1.5 text-sm sm:text-base">
+              <li>
+                Your name, phone number, email, company, website, or LinkedIn URL from the contact form.
+              </li>
+              <li>
+                Character counts or any per-field detail that could fingerprint your input.
+              </li>
+              <li>
+                Anything that could identify you personally.
+              </li>
+            </ul>
+
+            <p className="leading-relaxed text-sm sm:text-base mt-4">
+              Your contact information remains exclusively in the shareable link, as promised.
+            </p>
+
+            <p className="leading-relaxed text-sm sm:text-base mt-4">
+              If you contact us via the &ldquo;Need More?&rdquo; form on the homepage or our
+              <Link href="/contact" className="text-indigo-400 hover:text-indigo-300 mx-1 font-medium transition-colors">
+                /contact
+              </Link>
+              page, we do store your email and message — because that&rsquo;s the only way we can reply.
+              This is separate from the contact-sharing form.
             </p>
           </section>
 

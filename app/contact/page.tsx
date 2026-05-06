@@ -1,18 +1,19 @@
 "use client"
 
 import { useState } from "react"
-import { 
-  Mail, 
-  User, 
-  MessageSquare, 
-  Send, 
-  CheckCircle2, 
-  Sparkles, 
-  ShieldCheck, 
+import {
+  Mail,
+  User,
+  MessageSquare,
+  Send,
+  CheckCircle2,
+  Sparkles,
+  ShieldCheck,
   Zap,
   Loader2,
-  AlertCircle
+  AlertCircle,
 } from "lucide-react"
+import { submitBespokeEmail, trackBespokeClick } from "@/lib/smc-tracking"
 
 export default function ContactPage() {
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
@@ -24,36 +25,38 @@ export default function ContactPage() {
     setErrorMessage("")
 
     const formData = new FormData(e.currentTarget)
+    const name = String(formData.get("name") ?? "").trim()
+    const email = String(formData.get("email") ?? "").trim()
+    const message = String(formData.get("message") ?? "").trim()
+    const honeypot = String(formData.get("website") ?? "")
 
-    const endpoint =
-      process.env.NEXT_PUBLIC_CONTACT_ENDPOINT ||
-      "https://sharemycontact.com/contact.php"
+    // The leads table has no name column; prepend it so we don't lose it.
+    const fullMessage = name ? `From: ${name}\n\n${message}` : message
 
-    try {
-      const response = await fetch(endpoint, {
-        method: "POST",
-        body: formData,
-      })
-
-      let result: { success?: boolean; message?: string } = {}
-      try {
-        result = await response.json()
-      } catch {
-        // server returned non-JSON (e.g. HTML error page)
-      }
-
-      if (response.ok && result.success) {
-        setStatus('success')
-      } else {
-        setStatus('error')
-        setErrorMessage(
-          result.message ||
-            `Something went wrong (HTTP ${response.status}). Please try again later.`
-        )
-      }
-    } catch (error) {
-      setStatus('error')
+    // Two-step bespoke flow: register the click, then attach the email + message.
+    const leadId = await trackBespokeClick("contact_page_form")
+    if (leadId == null) {
+      setStatus("error")
       setErrorMessage("Could not connect to the server. Please try again later.")
+      return
+    }
+
+    const result = await submitBespokeEmail({
+      lead_id: leadId,
+      email,
+      message: fullMessage || undefined,
+      honeypot,
+    })
+
+    if (result.success) {
+      setStatus("success")
+    } else {
+      setStatus("error")
+      setErrorMessage(
+        result.error === "invalid_email"
+          ? "That email address doesn't look right."
+          : "Something went wrong. Please try again later."
+      )
     }
   }
 

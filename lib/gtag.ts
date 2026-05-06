@@ -24,7 +24,7 @@ export function track(name: string, params: EventParams = {}): void {
   sendGAEvent("event", name.slice(0, 40), cleaned)
 }
 
-// Backwards-compatible wrapper used across existing components.
+// Backwards-compatible wrapper used across navigation components.
 export function trackEvent(
   action: string,
   category: string,
@@ -49,44 +49,6 @@ export const trackSectionExit = (section: string, dwell_ms: number) =>
 export const trackHover = (target: string, dwell_ms: number) =>
   track("hover_dwell", { target, dwell_ms })
 
-// ---------- Form / field ----------
-
-export const trackFormStart = (form: string, first_field: string) =>
-  track("form_start", { form, first_field })
-
-export const trackFieldFocus = (form: string, field: string) =>
-  track("field_focus", { form, field })
-
-export const trackFieldBlur = (params: {
-  form: string
-  field: string
-  filled: boolean
-  duration_ms: number
-  char_count: number
-  changed: boolean
-}) => track("field_blur", params)
-
-export const trackFieldComplete = (form: string, field: string, char_count: number) =>
-  track("field_complete", { form, field, char_count })
-
-export const trackFormSubmit = (params: {
-  form: string
-  filled_fields: string
-  filled_count: number
-  duration_ms: number
-}) => track("form_submit", params)
-
-export const trackFormError = (form: string, reason: string) =>
-  track("form_error", { form, reason })
-
-export const trackFormAbandon = (params: {
-  form: string
-  last_field: string
-  duration_ms: number
-  filled_count: number
-  filled_fields: string
-}) => track("form_abandon", params)
-
 // ---------- Page-level engagement ----------
 
 export const trackScrollDepth = (depth_pct: number) =>
@@ -110,6 +72,3 @@ export const trackExitIntent = (page: string, total_ms: number) =>
 
 export const trackRageClick = (target: string, count: number) =>
   track("rage_click", { target, count })
-
-export const trackCtaClick = (cta: string, location: string) =>
-  track("cta_click", { cta, location })

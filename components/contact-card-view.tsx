@@ -19,7 +19,6 @@ import {
   Download,
   Share2,
 } from "lucide-react"
-import { trackEvent } from "@/lib/gtag"
 import { decodePayload } from "@/lib/encoding"
 import { buildVCard, vCardFilename } from "@/lib/vcard"
 
@@ -42,7 +41,6 @@ export function ContactCardView() {
     try {
       return decodePayload<ContactData>(raw)
     } catch {
-      trackEvent("error", "contact_card", "decode_failed")
       return null
     }
   }, [params.data])
@@ -66,7 +64,6 @@ export function ContactCardView() {
 
   function generateVCard() {
     if (!data?.name) return
-    trackEvent("click", "contact_card", "save_contact_vcard", 1)
 
     try {
       const vcard = buildVCard({
@@ -89,7 +86,6 @@ export function ContactCardView() {
       // Defer revoke so Safari/iOS can finish the download.
       setTimeout(() => URL.revokeObjectURL(url), 1000)
     } catch {
-      trackEvent("error", "contact_card", "vcard_generation_failed")
       setShareStatus("Could not save contact")
       setTimeout(() => setShareStatus(null), 2000)
     }
@@ -97,21 +93,18 @@ export function ContactCardView() {
 
   async function handleShare() {
     if (!data) return
-    trackEvent("click", "contact_card", "share_contact")
     if (typeof navigator !== "undefined" && navigator.share) {
       try {
         await navigator.share({
           title: `${data.name}'s Contact`,
           url: window.location.href,
         })
-        trackEvent("share", "contact_card", "native_share_completed")
       } catch {
-        trackEvent("share", "contact_card", "native_share_cancelled")
+        // share cancelled — nothing to do
       }
     } else {
       try {
         await navigator.clipboard.writeText(window.location.href)
-        trackEvent("share", "contact_card", "link_copied_fallback")
         setShareStatus("Link copied!")
       } catch {
         setShareStatus("Could not copy link")
@@ -153,7 +146,6 @@ export function ContactCardView() {
                     href={field.href}
                     target={field.label === "Phone" || field.label === "Email" ? undefined : "_blank"}
                     rel="noopener noreferrer"
-                    onClick={() => trackEvent("click", "contact_card", `field_${field.label.toLowerCase()}`)}
                     className="block truncate text-sm font-medium text-primary hover:underline"
                   >
                     {field.value}
