@@ -10,6 +10,212 @@ export interface BlogPost {
 
 export const blogPosts: BlogPost[] = [
   {
+      slug: "2026-05-outdated-processes-cost-time",
+  title: "Outdated Processes Quietly Waste More Time Every Year",
+  date: "2026-05-13",
+  formattedDate: "May 13, 2026",
+  excerpt:
+    "Technology keeps evolving, but many everyday processes stay exactly the same. The result? Small inefficiencies silently grow into massive time losses over the years.",
+  content: `The world keeps moving forward.
+
+Technology evolves.  
+Apps improve.  
+Systems become faster.  
+User experiences become smoother.
+
+But strangely, many people still follow the exact same processes they used years ago.
+
+And most of the time, they don’t even notice how much time that continues to cost them.
+
+## Small Inefficiencies Add Up
+
+A few extra seconds here.  
+A few unnecessary steps there.
+
+At first, it feels irrelevant.
+
+But when you repeat the same outdated process every day, week, or month, those tiny delays slowly turn into something much bigger.
+
+Hours disappear.  
+Energy gets wasted.  
+Interactions become slower than they should be.
+
+And because the process feels “normal,” nobody questions it anymore.
+
+## Old Technology Always Slows Down
+
+There’s an interesting comparison here.
+
+Think about an old phone.
+
+At some point, every device starts feeling slower:
+- apps take longer to load,
+- interactions become less responsive,
+- and simple tasks suddenly feel frustrating.
+
+Not because you changed — but because the technology around you evolved while the old system stayed the same.
+
+The exact same thing happens with outdated workflows and habits.
+
+Processes that once felt acceptable slowly become inefficient compared to modern alternatives.
+
+## The Dangerous Part: You Stop Noticing It
+
+This is where things become interesting.
+
+People adapt surprisingly fast to inconvenience.
+
+If something takes too long every single day, eventually it just feels “normal.”
+
+But normal doesn’t always mean efficient.
+
+Sometimes it simply means:
+> “You got used to wasting time.”
+
+And that’s a surprisingly common problem in digital experiences today.
+
+## Modern Tools Should Remove Friction
+
+Good technology shouldn’t add more steps.
+
+It should remove them.
+
+The best tools are usually the ones that:
+- reduce hesitation,
+- simplify interactions,
+- and save time without requiring effort from the user.
+
+That’s especially important for everyday actions like sharing contacts, connecting with people, or exchanging information quickly.
+
+Because these are the moments people repeat constantly.
+
+## Why Simplicity Matters More Over Time
+
+The longer outdated systems remain unchanged, the more noticeable their inefficiency becomes.
+
+What felt “good enough” five years ago often feels unnecessarily slow today.
+
+And in a fast-moving world, convenience matters more than ever.
+
+That’s why we believe even small improvements in daily interactions can make a surprisingly large difference over time.
+
+## A Faster Way Forward
+
+Our goal is simple:
+
+Reduce friction.  
+Save time.  
+Make connecting with people feel effortless again.
+
+No unnecessary complexity.  
+No outdated processes.  
+Just a smoother experience built for how people interact today.
+
+If you’ve ever caught yourself thinking, “Why does this still take so many steps?”, then you already understand why modernizing small workflows matters.
+
+Try the tool yourself and experience how much simpler things can feel.`,
+  author: "Olivier",
+},
+  {
+      slug: "2026-05-contact-sharing-should-be-faster",
+  title: "Why Sharing a Contact Still Feels Slower Than It Should",
+  date: "2026-05-06",
+  formattedDate: "May 6, 2026",
+  excerpt:
+    "Sharing contact information should be instant in 2026 — yet most people still deal with unnecessary apps, setup steps, and awkward friction. Here's why simplicity matters more than ever.",
+  content: `Sharing a contact is one of the most common actions people perform today.
+
+You meet someone at an event.  
+You connect with a colleague.  
+You talk to someone at a café, a party, or after a meeting.
+
+And almost every single time, the same thing happens:
+
+The process feels far more complicated than it should.
+
+## The Illusion of “Easy”
+
+A lot of people assume exchanging contacts is already solved.
+
+After all, smartphones exist. Apps exist. QR codes exist.
+
+So why does it still feel inconvenient?
+
+Because “technically possible” and “actually effortless” are two completely different things.
+
+Usually, the process looks something like this:
+- Search for an app
+- Download it
+- Create an account
+- Configure settings
+- Figure out how it works
+- Hope the other person has the same setup
+
+And suddenly, something that should take seconds turns into a weird multi-step experience.
+
+## Small Friction Changes Everything
+
+Most people underestimate how much tiny obstacles affect behavior.
+
+Even a delay of 20–30 seconds can completely change a social interaction.
+
+The longer something takes:
+- the more awkward it becomes,
+- the more people hesitate,
+- and the more likely the moment simply disappears.
+
+That’s the real issue.
+
+Not technology.  
+Not capability.  
+Just unnecessary friction.
+
+## Why Simplicity Wins
+
+The best tools are often the ones people barely notice.
+
+No complicated onboarding.  
+No explaining required.  
+No “wait, let me install this first.”
+
+Just open it and use it.
+
+That’s the direction modern contact sharing should move toward:
+- faster,
+- lighter,
+- more natural,
+- and invisible enough to fit seamlessly into real conversations.
+
+## The Problem Isn’t Big — But It Happens Constantly
+
+Some people look at this problem and think:
+
+“Is this really important?”
+
+Maybe not in a dramatic sense.
+
+But when something happens dozens, hundreds, or even thousands of times across daily life, efficiency suddenly matters a lot.
+
+Small moments shape real experiences.
+
+And improving those small moments is often what makes a tool genuinely useful.
+
+## A Better Way to Share Contacts
+
+We built our tool around one simple idea:
+
+Sharing contact information should feel instant — not like setting up software.
+
+No unnecessary complexity.  
+No confusing process.  
+Just a faster and smoother way to connect with people.
+
+If you’ve ever felt how oddly clunky contact sharing still is in 2026, you’ll probably understand exactly why this matters.
+
+Try it yourself and see how much simpler the experience can feel.`,
+  author: "Olivier",
+},
+  {
   slug: "2026-04-29-more-than-just-contact-sharing",
   title: "More Than Just Contact Sharing",
   date: "2026-04-29",
