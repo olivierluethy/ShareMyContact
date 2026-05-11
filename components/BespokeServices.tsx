@@ -1,20 +1,6 @@
-"use client"
-
-import { useState } from "react"
-import { trackBespokeClick } from "@/lib/smc-tracking"
-import { BespokeContactModal } from "@/components/BespokeContactModal"
+import Link from "next/link"
 
 export function BespokeServices() {
-  const [open, setOpen] = useState(false)
-  const [leadId, setLeadId] = useState<number | null>(null)
-
-  async function handleOpen() {
-    setOpen(true)
-    setLeadId(null)
-    const id = await trackBespokeClick("contact_us_need_more")
-    setLeadId(id)
-  }
-
   return (
     <section className="bg-gradient-to-b from-gray-950 to-black py-12 sm:py-16 md:py-20 border-t border-indigo-900/20">
       <div className="max-w-6xl mx-auto px-4 sm:px-8 lg:px-10">
@@ -35,9 +21,8 @@ export function BespokeServices() {
 
           {/* Right CTA */}
           <div className="md:flex-shrink-0">
-            <button
-              type="button"
-              onClick={handleOpen}
+            <Link
+              href="/contact"
               className="inline-flex w-full md:w-auto items-center justify-center gap-3 px-6 py-3.5 sm:px-8 sm:py-4
                          bg-gradient-to-r from-indigo-600 to-purple-600
                          hover:from-indigo-500 hover:to-purple-500
@@ -49,16 +34,10 @@ export function BespokeServices() {
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
-            </button>
+            </Link>
           </div>
         </div>
       </div>
-
-      <BespokeContactModal
-        open={open}
-        leadId={leadId}
-        onClose={() => setOpen(false)}
-      />
     </section>
   )
 }
